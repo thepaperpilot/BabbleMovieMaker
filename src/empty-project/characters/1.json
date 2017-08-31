@@ -1,0 +1,19 @@
+{
+  "deadbonesStyle": false,
+  "body": [],
+  "head": [],
+  "hat": [],
+  "mouths": [],
+  "eyes": [],
+  "emotes": {
+    "default": {
+      "enabled": true,
+      "mouth": [],
+      "eyes": []
+    }
+  },
+  "props": [],
+  "position": 1,
+  "facingLeft": false,
+  "emote": "default"
+}

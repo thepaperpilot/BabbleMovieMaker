@@ -1,0 +1,17 @@
+{
+  "numCharacters": 5,
+  "puppetScale": 1,
+  "greenScreen": "#00FF00",
+  "duration": 5,
+  "fps": 60,
+  "resolution": "1920x1080",
+  "characters": [
+    {
+      "name": "",
+      "id": 1,
+      "location": "1.json"
+    }
+  ],
+  "assets": [],
+  "script": ""
+}
