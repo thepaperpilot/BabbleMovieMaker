@@ -83,7 +83,7 @@ exports.getThumbnail = function() {
 }
 
 exports.resize = function() {
-	stage.resize(null, project.project.resolution.split("x")[1], project.project.resolution.split("x")[1])
+	stage.resize(null, project.project.resolution.split("x")[0], project.project.resolution.split("x")[1])
 }
 
 exports.toggleGreenscreen = function() {
