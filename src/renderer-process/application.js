@@ -111,7 +111,6 @@ function resolutionChange(e) {
 }
 
 function exportScript() {
-	console.log("!")
 	remote.dialog.showSaveDialog(remote.BrowserWindow.getFocusedWindow(), {
 		title: 'Save script',
 		defaultPath: remote.app.getPath('home'),

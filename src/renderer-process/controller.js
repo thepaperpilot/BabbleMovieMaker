@@ -103,8 +103,11 @@ exports.toggleGreenscreen = function() {
 }
 
 function start() {
-	exports.resize()
-	loop()
+	if (stage) {
+		exports.resize()
+		loop()
+		// Protection against start being called before stage constructor returns, like it'll do in the event of there being no assets to load
+	} else requestAnimationFrame(start)
 }
 
 // Temporary script for testing purposes
