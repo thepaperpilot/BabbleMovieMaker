@@ -17,7 +17,7 @@
     "electron-packager": "^8.7.1"
   },
   "dependencies": {
-    "babble.js": "~1.2.7",
+    "babble.js": "~1.6.1",
     "canvas-background": "~0.1.3",
     "electron": "~1.6.10",
     "electron-window-state": "~4.1.1",

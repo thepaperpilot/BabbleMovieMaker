@@ -10,12 +10,11 @@ const path = require('path')
 
 module.exports = exports = remote.getGlobal('project').project = {
     // project: {},
-    // characters: {},
+    // actors: {},
     // assets: {},
-    // charactersPath: "",
     // assetsPath: "",
     // numCharacters: 0,
-    // script: ""
+    // scripts: []
 	readProject: function() {
 		if (!this.checkChanges()) return
 
@@ -27,20 +26,16 @@ module.exports = exports = remote.getGlobal('project').project = {
 			}
 
 			this.project = proj
+			this.assets = fs.readJsonSync(path.join(filepath, '..', 'assets.json'))
+			this.actors = fs.readJsonSync(path.join(filepath, '..', 'actors.json'))
+			this.scripts = fs.readJsonSync(path.join(filepath, '..', 'scripts.json'))
+
 			this.oldProject = JSON.stringify(proj)
-			this.characters = {}
-			this.assets = {}
-			this.charactersPath = path.join(filepath, '..', 'characters')
-			this.assetsPath = path.join(filepath, '..', 'assets')
-			for (let i = 0; i < proj.characters.length; i++) {
-				this.characters[proj.characters[i].name] = fs.readJsonSync(path.join(this.charactersPath, proj.characters[i].location))
-				this.characters[proj.characters[i].name].name = proj.characters[i].name
-			}
-			this.oldCharacters = JSON.stringify(this.characters)
-			for (let i = 0; i < proj.assets.length; i++) {
-				this.assets[proj.assets[i].name] = fs.readJsonSync(path.join(this.assetsPath, proj.assets[i].location))
-			}
 			this.oldAssets = JSON.stringify(this.assets)
+			this.oldActors = JSON.stringify(this.actors)
+			this.oldScripts = JSON.stringify(this.scripts)
+
+			this.assetsPath = path.join(filepath, '..', 'Assets')
 
 			settings.settings.openProject = filepath
 			settings.save()
@@ -49,26 +44,27 @@ module.exports = exports = remote.getGlobal('project').project = {
 		})
 	},
 	saveProject: function() {
-		fs.writeJson(settings.settings.openProject, this.project)
-		for (let i = 0; i < this.project.assets.length; i++)
-			fs.writeJson(path.join(settings.settings.openProject, '..', 'assets', this.project.assets[i].location), this.assets[this.project.assets[i].name])
-		for (let i = 0; i < this.project.characters.length; i++) {
-			fs.writeJson(path.join(settings.settings.openProject, '..', 'characters', this.project.characters[i].location), this.characters[this.project.characters[i].name])
-		}
+		fs.writeJson(settings.settings.openProject, JSON.stringify(this.project, null, 4))
+		fs.writeFile(path.join(settings.settings.openProject, '..', 'assets.json'), JSON.stringify(this.assets, null, 4))
+		fs.writeFile(path.join(settings.settings.openProject, '..', 'actors.json'), JSON.stringify(this.actors, null, 4))
+		fs.writeFile(path.join(settings.settings.openProject, '..', 'scripts.json'), JSON.stringify(this.scripts, null, 4))
 		settings.addRecentProject(controller.getThumbnail())
 		this.oldProject = JSON.stringify(this.project)
 		this.oldAssets = JSON.stringify(this.assets)
-		this.oldCharacters = JSON.stringify(this.characters)
+		this.oldActors = JSON.stringify(this.actors)
+		this.oldScripts = JSON.stringify(this.scripts)
 	},
 	closeProject: function() {
 		if (!this.checkChanges()) return
 
 		this.project = null
 		this.assets = null
-		this.characters = null
+		this.actors = null
+		this.scripts = null
 		this.oldProject = 'null'
 		this.oldAssets = 'null'
-		this.oldCharacters = 'null'
+		this.oldActors = 'null'
+		this.oldScripts = 'null'
 		settings.settings.openProject = ""
 		settings.save()
 		menu.updateMenu()
@@ -79,7 +75,8 @@ module.exports = exports = remote.getGlobal('project').project = {
 	checkChanges: function() {
 		let changes = this.oldProject !== JSON.stringify(this.project)
 		changes = changes || this.oldAssets !== JSON.stringify(this.assets)
-		changes = changes || this.oldCharacters !== JSON.stringify(this.characters)
+		changes = changes || this.oldActors !== JSON.stringify(this.actors)
+		changes = changes || this.oldScripts !== JSON.stringify(this.scripts)
 		if (changes) {
 			let response = dialog.showMessageBox({
 				"type": "question",

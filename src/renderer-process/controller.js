@@ -22,7 +22,7 @@ exports.init = function() {
 	status.log('Loading project...', 1, 1)
 	project = remote.getGlobal('project').project
 	application.init()
-	stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, start, status, false)
+	stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, start, status, true)
 
 	// Set up a second renderer for use with the greenscreen
 	opague = PIXI.autoDetectRenderer(1, 1, {transparent: false})
@@ -104,6 +104,7 @@ exports.toggleGreenscreen = function() {
 
 function start() {
 	if (stage) {
+		status.log('Project Loaded!', 1, 1)
 		exports.resize()
 		loop()
 		// Protection against start being called before stage constructor returns, like it'll do in the event of there being no assets to load
@@ -112,22 +113,8 @@ function start() {
 
 // Temporary script for testing purposes
 function loop() {
-	let emotes = ["happy", "confused", "gasp", "ooo", "sad"]
-	for (let i = 0; i < 5; i++) {
-		let script = "add Gravy " + i + " 0;" + "\n" +
-			"move " + i + " " + (i + 1) + ";" + "\n" +
-			"babble " + i + ";" + "\n" +
-			"delay 1000;" + "\n" +
-			"jiggle " + i + "," + "\n" +
-			"babble " + i + ";" + "\n" +
-			"emote " + i + " " + emotes[i] + ";" + "\n" +
-			"delay 500;" + "\n" +
-			"move " + i + " 6;" + "\n" + 
-			"remove " + i + ";" + "\n"
-		if (i == 4) { // If this is the last puppet, start the loop over after completion
-			new babble.Cutscene(stage, script, project.characters, loop).start()
-		} else new babble.Cutscene(stage, script, project.characters).start()
-	}
+	console.log(project.scripts[0])
+	new babble.Cutscene(stage, project.scripts[0], project.actors, loop).start()
 }
 
 function renderFrame() {

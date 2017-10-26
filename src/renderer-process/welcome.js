@@ -45,7 +45,7 @@ document.getElementById('create').addEventListener('submit', function(e) {
 	fs.moveSync(path.join(dest, 'empty-project.babblemm'), path.join(dest, name + '.babblemm'))
 
 	// Open new project
-	remote.require('./main').setFilepath(path.join(dest, name + '.babble'))
+	remote.require('./main').setFilepath(path.join(dest, name + '.babblemm'))
 	remote.require('./main').redirect('application.html')
 })
 let recentProjectsElement = document.getElementById('recent-projects')
