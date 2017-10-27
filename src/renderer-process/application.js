@@ -6,13 +6,14 @@
 const electron = require('electron')
 const remote = electron.remote
 const modal = new (require('vanilla-modal').default)()
+const JSONEditor = require('jsoneditor')
 const status = require('./status.js')
 const controller = require('./controller.js')
 const path = require('path')
 const fs = require('fs-extra')
 
 let project
-let stage
+let editor
 
 exports.init = function() {
 	project = electron.remote.getGlobal('project').project
@@ -33,7 +34,7 @@ exports.init = function() {
 	document.getElementById('numslots').addEventListener('change', numslotsChange)
 	document.getElementById('resolutions').addEventListener('change', resolutionChange)
 	document.getElementById('exportscript').addEventListener('click', exportScript)
-	document.getElementById('cancelscript').addEventListener('click', toggleModal)
+	document.getElementById('cancelscript').addEventListener('click', toggleEditor)
 	document.getElementById('savescript').addEventListener('click', saveScript)
 
 	// Handle input events from popout
@@ -57,6 +58,355 @@ exports.init = function() {
 	document.getElementById('puppetscale').value = project.project.puppetScale
 	document.getElementById('numslots').value = project.project.numCharacters
 	document.getElementById('resolutions').value = project.project.resolution
+
+	// setup json editor
+	let options = {
+		templates: [
+		{
+			text: 'Run',
+			title: 'Run a sub script',
+			field: 'RunTemplate',
+			value: {
+				'command': 'run',
+				'script': {}
+			}
+		},
+		{
+			text: 'Add',
+			title: 'Add a puppet to the stage',
+			field: 'AddTemplate',
+			value: {
+				'command': 'add',
+				'name': '',
+				'id': '',
+				'position': '',
+				'facingLeft': '',
+				'emote': ''
+			}
+		},
+		{
+			text: 'Set',
+			title: 'Changes a puppet into a new one',
+			field: 'SetTemplate',
+			value: {
+				'command': 'set',
+				'target': '',
+				'name': ''
+			}
+		},
+		{
+			text: 'Remove',
+			title: 'Removes a puppet from the stage',
+			field: 'RemoveTemplate',
+			value: {
+				'command': 'remove',
+				'target': ''
+			}
+		},
+		{
+			text: 'Delay',
+			title: 'Adds a delay to the script',
+			field: 'DelayTemplate',
+			value: {
+				'command': 'delay',
+				'duration': ''
+			}
+		},
+		{
+			text: 'Move',
+			title: 'Makes a puppet walk to a new location',
+			field: 'MoveTemplate',
+			value: {
+				'command': 'move',
+				'target': '',
+				'position': ''
+			}
+		},
+		{
+			text: 'FacingLeft',
+			title: 'Changes direction of a puppet',
+			field: 'FacingLeftTemplate',
+			value: {
+				'command': 'facingLeft',
+				'target': '',
+				'facingLeft': ''
+			}
+		},
+		{
+			text: 'Babble',
+			title: 'Changes whether a puppet is babbling',
+			field: 'BabbleTemplate',
+			value: {
+				'command': 'babble',
+				'target': '',
+				'action': ''
+			}
+		},
+		{
+			text: 'Emote',
+			title: 'Changes a puppet\'s emote',
+			field: 'EmoteTemplate',
+			value: {
+				'command': 'emote',
+				'target': '',
+				'emote': ''
+			}
+		},
+		{
+			text: 'Jiggle',
+			title: 'Causes a puppet to jiggle',
+			field: 'JiggleTemplate',
+			value: {
+				'command': 'jiggle',
+				'target': ''
+			}
+		}
+		],
+		schema: {
+		  "$schema": "http://json-schema.org/draft-06/schema#",
+		  "description": "A representation of a Babble Buds cutscene script",
+		  "type": "array",
+		  "items": {
+		    "type": "object",
+		    "properties": {
+		      "command": {
+		        "type": "string",
+		        "enum": [
+		          "run",
+		          "add",
+		          "set",
+		          "remove",
+		          "delay",
+		          "move",
+		          "facingLeft",
+		          "babble",
+		          "emote",
+		          "jiggle"
+		        ]
+		      }
+		    },
+		    "required": [
+		      "command"
+		    ],
+		    "switch": [
+		      {
+		        "if": {
+		          "properties": {
+		            "command": "run"
+		          }
+		        },
+		        "then": {
+		          "properties": {
+		            "script": {
+		              "$ref": "#"
+		            }
+		          },
+		          "required": [
+		            "script"
+		          ]
+		        }
+		      },
+		      {
+		        "if": {
+		          "properties": {
+		            "command": "add"
+		          }
+		        },
+		        "then": {
+		          "properties": {
+		            "name": {
+		              "type": "string"
+		            },
+		            "id": {
+		              "type": "string"
+		            },
+		            "position": {
+		              "type": "number"
+		            },
+		            "facingLeft": {
+		              "type": "boolean"
+		            },
+		            "emote": {
+		              "type": "number"
+		            }
+		          },
+		          "required": [
+		            "name",
+		            "id"
+		          ]
+		        }
+		      },
+		      {
+		        "if": {
+		          "properties": {
+		            "command": "set"
+		          }
+		        },
+		        "then": {
+		          "properties": {
+		            "target": {
+		              "type": "string"
+		            },
+		            "name": {
+		              "type": "string"
+		            }
+		          },
+		          "required": [
+		            "target",
+		            "name"
+		          ]
+		        }
+		      },
+		      {
+		        "if": {
+		          "properties": {
+		            "command": "remove"
+		          }
+		        },
+		        "then": {
+		          "properties": {
+		            "target": {
+		              "type": "string"
+		            }
+		          },
+		          "required": [
+		            "target"
+		          ]
+		        }
+		      },
+		      {
+		        "if": {
+		          "properties": {
+		            "command": "delay"
+		          }
+		        },
+		        "then": {
+		          "properties": {
+		            "duration": {
+		              "type": "number"
+		            }
+		          },
+		          "required": [
+		            "duration"
+		          ]
+		        }
+		      },
+		      {
+		        "if": {
+		          "properties": {
+		            "command": "move"
+		          }
+		        },
+		        "then": {
+		          "properties": {
+		            "target": {
+		              "type": "string"
+		            },
+		            "position": {
+		              "type": "number"
+		            }
+		          },
+		          "required": [
+		            "target",
+		            "position"
+		          ]
+		        }
+		      },
+		      {
+		        "if": {
+		          "properties": {
+		            "command": "facingLeft"
+		          }
+		        },
+		        "then": {
+		          "properties": {
+		            "target": {
+		              "type": "string"
+		            },
+		            "facingLeft": {
+		              "type": "boolean",
+		              "default": true
+		            }
+		          },
+		          "required": [
+		            "target"
+		          ]
+		        }
+		      },
+		      {
+		        "if": {
+		          "properties": {
+		            "command": "babble"
+		          }
+		        },
+		        "then": {
+		          "properties": {
+		            "target": {
+		              "type": "string"
+		            },
+		            "action": {
+		              "type": "string",
+		              "enum": [
+		                "start",
+		                "stop",
+		                "toggle"
+		              ],
+		              "default": "toggle"
+		            }
+		          },
+		          "required": [
+		            "target"
+		          ]
+		        }
+		      },
+		      {
+		        "if": {
+		          "properties": {
+		            "command": "emote"
+		          }
+		        },
+		        "then": {
+		          "properties": {
+		            "target": {
+		              "type": "string"
+		            },
+		            "emote": {
+		              "type": "number",
+		              "default": 0
+		            }
+		          },
+		          "required": [
+		            "target"
+		          ]
+		        }
+		      },
+		      {
+		        "if": {
+		          "properties": {
+		            "command": "jiggle"
+		          }
+		        },
+		        "then": {
+		          "properties": {
+		            "target": {
+		              "type": "string"
+		            }
+		          },
+		          "required": [
+		            "jiggle"
+		          ]
+		        }
+		      }
+		    ]
+		  }
+		},
+		autocomplete: {
+			getOptions: function () {
+				return Object.keys(project.actors)
+			}
+		}
+	}
+	editor = new JSONEditor(document.getElementById('editorscript'), options)
 }
 
 function beforeUnload() {
@@ -74,9 +424,9 @@ function toggleSettings() {
 	}
 }
 
-function openEditor(e) {
-	document.getElementById('editorscript').value = project.project.script
-	toggleModal("#editor")
+function openEditor() {
+	editor.set(project.scripts[0])
+	toggleEditor()
 }
 
 function colorpickerChange(e) {
@@ -114,17 +464,17 @@ function exportScript() {
 	remote.dialog.showSaveDialog(remote.BrowserWindow.getFocusedWindow(), {
 		title: 'Save script',
 		defaultPath: remote.app.getPath('home'),
-        filters: [
-          {name: 'Text', extensions: ['txt']}
-        ]
+		filters: [
+		{name: 'Text', extensions: ['txt']}
+		]
 	}, (file) => {
-    	if (file) fs.outputFile(file, document.getElementById('editorscript').value)
+		if (file) fs.outputFile(file, JSON.stringify(editor.get()), null, 2)
 	})
 }
 
 function saveScript() {
-	project.project.script = document.getElementById('editorscript').value
-	toggleModal()
+	project.scripts[0] = editor.get()
+	toggleEditor()
 }
 
 function toggleModal(string) {
@@ -132,4 +482,12 @@ function toggleModal(string) {
 		modal.close()
 	else
 		modal.open(string)
+}
+
+function toggleEditor() {
+	if (document.getElementById('screen').classList.contains('hidden')) {
+		document.getElementById('screen').classList.remove('hidden')
+	} else {
+		document.getElementById('screen').classList.add('hidden')
+	}
 }

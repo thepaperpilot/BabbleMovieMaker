@@ -113,7 +113,7 @@ function start() {
 
 // Temporary script for testing purposes
 function loop() {
-	console.log(project.scripts[0])
+	stage.clearPuppets()
 	new babble.Cutscene(stage, project.scripts[0], project.actors, loop).start()
 }
 

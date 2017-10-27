@@ -44,7 +44,7 @@ module.exports = exports = remote.getGlobal('project').project = {
 		})
 	},
 	saveProject: function() {
-		fs.writeJson(settings.settings.openProject, JSON.stringify(this.project, null, 4))
+		fs.writeFile(settings.settings.openProject, JSON.stringify(this.project, null, 4))
 		fs.writeFile(path.join(settings.settings.openProject, '..', 'assets.json'), JSON.stringify(this.assets, null, 4))
 		fs.writeFile(path.join(settings.settings.openProject, '..', 'actors.json'), JSON.stringify(this.actors, null, 4))
 		fs.writeFile(path.join(settings.settings.openProject, '..', 'scripts.json'), JSON.stringify(this.scripts, null, 4))

@@ -76,7 +76,10 @@ select option {
 	height: calc( 100% - 320px );
 	padding: 0;
 	width: calc( 100% - 450px );
-	position: relative;
+	position: absolute;
+	left: 0;
+	top: 0;
+	transition: all .5s ease;
 }
 
 .main canvas {
@@ -90,10 +93,12 @@ select option {
 }
 
 .bottom {
-	height: 230px;
+	height: 220px;
 	margin-bottom: 0;
 	width: calc( 100% - 470px );
 	min-width: 234px;
+	position: absolute;
+	bottom: 10px;
 }
 
 .side {
@@ -138,6 +143,8 @@ select option {
 	text-align: center;
 	width: calc( 100% - 470px );
 	overflow-y: overlay;
+	position: absolute;
+	bottom: 250px;
 }
 
 .status::-webkit-scrollbar {
@@ -428,4 +435,25 @@ select option {
     height: 500px;
     color: white;
     padding: 8px;
+    height: calc(100% - 64px);
+}
+
+div.jsoneditor-field, div.jsoneditor-value, div.jsoneditor td, div.jsoneditor th, div.jsoneditor textarea, .jsoneditor-schema-error {
+    color: white;
+}
+
+div.jsoneditor-tree button.jsoneditor-expanded {
+    background-position: 72px -72px;
+}
+
+div.jsoneditor-tree button.jsoneditor-collapsed {
+    background-position: 96px -72px;
+}
+
+div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-value.jsoneditor-array {
+    color: lightgrey;
+}
+
+.hidden {
+	top: -100%;
 }

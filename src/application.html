@@ -2,10 +2,17 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" href="assets/css/jsoneditor.css">
         <link rel="stylesheet" type="text/css" href="assets/css/main.css">
         <title>Babble Movie Maker</title>
     </head>
     <body>
+        <div id="editor" class="container main">
+            <div id="editorscript" class="editor"></div>
+            <button id="exportscript">Export</button>
+            <button id="cancelscript" style="float: right">Cancel</button>
+            <button id="savescript" style="float: right;">Save Script</button>
+        </div>
         <div id="screen" class="container main"></div>
         <div id="status" class="container status"></div>
         <div id="bottom" class="container bottom">
@@ -58,12 +65,6 @@
             <h1 style="color: #15191f;font-size: 90px;margin-bottom: 30px;text-shadow: 0 1px 1px #666;">Babble Movie Maker</h1>
             <strong style="color: #54647a;"><script>document.write(require('electron').remote.app.getVersion())</script></strong><br/>
             <p style="color: #fff;">Babble Movie Maker is a free, open source tool for making cutscenes or videos using puppets created by Babble Buds. The software is written using electron and PIXI.js.</p>
-        </div>
-        <div id="editor" style="display: none;">
-            <textarea id="editorscript" class="editor"></textarea>
-            <button id="exportscript">Export</button>
-            <button id="cancelscript" style="float: right">Cancel</button>
-            <button id="savescript" style="float: right;">Save Script</button>
         </div>
         <div class="modal">
             <div class="modal-inner">
