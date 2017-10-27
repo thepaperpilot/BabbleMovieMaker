@@ -468,7 +468,11 @@ function exportScript() {
 		{name: 'Text', extensions: ['txt']}
 		]
 	}, (file) => {
+<<<<<<< HEAD
 		if (file) fs.outputFile(file, JSON.stringify(editor.get()), null, 2)
+=======
+    	if (file) fs.outputFile(file, JSON.stringify(editor.get()), null, 2)
+>>>>>>> abaed9e... Added json editor
 	})
 }
 
