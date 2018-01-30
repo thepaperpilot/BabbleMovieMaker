@@ -5,6 +5,7 @@ const main = remote.require('./main')
 const settings = remote.require('./main-process/settings')
 const menu = remote.require('./main-process/menus/application-menu')
 const controller = require('./controller')
+const status = require('./status')
 
 const path = require('path')
 
@@ -25,6 +26,11 @@ module.exports = exports = remote.getGlobal('project').project = {
 				return
 			}
 
+			status.init()
+			status.log('Loading project...', 1, 1)
+			
+			remote.getGlobal('project').project = this
+
 			this.project = proj
 			this.assets = fs.readJsonSync(path.join(filepath, '..', 'assets.json'))
 			this.actors = fs.readJsonSync(path.join(filepath, '..', 'actors.json'))
@@ -35,12 +41,15 @@ module.exports = exports = remote.getGlobal('project').project = {
 			this.oldActors = JSON.stringify(this.actors)
 			this.oldScripts = JSON.stringify(this.scripts)
 
-			this.assetsPath = path.join(filepath, '..', 'Assets')
+			this.assetsPath = path.join(filepath, '..', 'assets')
 
 			settings.settings.openProject = filepath
 			settings.save()
-            controller.init()
-			menu.updateMenu()
+
+			requestAnimationFrame(() => {
+				controller.init()
+				menu.updateMenu()
+			})
 		})
 	},
 	saveProject: function() {

@@ -14,30 +14,41 @@
             <button id="savescript" style="float: right;">Save Script</button>
         </div>
         <div id="screen" class="container main"></div>
-        <div id="status" class="container status"></div>
+        <div id="status" class="container status">Loading Interface...</div>
         <div id="bottom" class="container bottom">
-            <div class="buttons s2 scroll">
+            <div class="buttons s2">
                 <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label" style="width: 100%;">Green Screen</label>
-                <button id="settings">Project Settings</button>
+                <button id="settings" class="button-tab">Project Settings</button>
                 <button id="script">Edit Script</button>
                 <button id="export">Export Movie</button>
             </div>
-            <div id="chars" class="s8 horiz-scroll">
+            <div id="timeline" class="s8">
+                <div id="vert-scroll" class="vert-scroll">
+                    <div id="actors" class="actors"></div>
+                    <div id="time-scroll" class="horiz-scroll">
+                        <div id="frames" class="frames"></div>
+                    </div>
+                </div>
             </div>
             <div id="settings-panel" class="s8 scroll" style="display: none;">
-                <div class="s5">
-                    Green Screen Color:
-                    <input type="color" id="colorpicker" value="#00FF00" style="width: calc(100% - 16px)">
-                    Movie Duration: (seconds)
-                    <input type="number" id="duration" value="5" style="width: calc(100% - 16px)">
-                    Frames Per Second:
-                    <input type="number" id="fps" value="60" style="width: calc(100% - 16px)">
-                </div>
+                Green Screen Color:
+                <input type="color" id="colorpicker" value="#00FF00" style="width: calc(100% - 16px); margin-bottom: 0">
+                <h4>Stage Settings</h4>
                 <div class="s5">
                     Puppet Scale:
                     <input type="number" id="puppetscale" value="1" style="width: calc(100% - 16px)" step="0.1">
+                </div>
+                <div class="s5">
                     Number of Slots:
                     <input type="number" id="numslots" value="5" style="width: calc(100% - 16px)">
+                </div>
+                <br/>
+                <h4>Movie Settings</h4>
+                <div class="s5">
+                    Frames Per Second:
+                    <input type="number" id="fps" value="60" style="width: calc(100% - 16px); margin-bottom: 0">
+                </div>
+                <div class="s5">
                     Resolution:
                     <select id="resolutions">
                         <option value="1024x768">1024x768</option>

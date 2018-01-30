@@ -14,11 +14,14 @@ const fs = require('fs-extra')
 
 let project
 let editor
+let playing
 
 exports.init = function() {
 	project = electron.remote.getGlobal('project').project
 
 	// Window events
+	window.onkeydown = keyDown
+	//window.onkeyup = keyUp
 	window.onbeforeunload = beforeUnload
 	window.addEventListener("resize", controller.resize)
 
@@ -28,7 +31,6 @@ exports.init = function() {
 	document.getElementById('script').addEventListener('click', openEditor)
 	document.getElementById('export').addEventListener('click', controller.export)
 	document.getElementById('colorpicker').addEventListener('change', colorpickerChange)
-	document.getElementById('duration').addEventListener('change', durationChange)
 	document.getElementById('fps').addEventListener('change', fpsChange)
 	document.getElementById('puppetscale').addEventListener('change', puppetscaleChange)
 	document.getElementById('numslots').addEventListener('change', numslotsChange)
@@ -53,7 +55,6 @@ exports.init = function() {
 
 	// Load settings values
 	document.getElementById('colorpicker').value = project.project.greenScreen
-	document.getElementById('duration').value = project.project.duration
 	document.getElementById('fps').value = project.project.fps
 	document.getElementById('puppetscale').value = project.project.puppetScale
 	document.getElementById('numslots').value = project.project.numCharacters
@@ -62,15 +63,15 @@ exports.init = function() {
 	// setup json editor
 	let options = {
 		templates: [
-		{
-			text: 'Run',
-			title: 'Run a sub script',
-			field: 'RunTemplate',
-			value: {
-				'command': 'run',
-				'script': {}
-			}
-		},
+		//{
+		//	text: 'Run',
+		//	title: 'Run a sub script',
+		//	field: 'RunTemplate',
+		//	value: {
+		//		'command': 'run',
+		//		'script': {}
+		//	}
+		//},
 		{
 			text: 'Add',
 			title: 'Add a puppet to the stage',
@@ -109,7 +110,7 @@ exports.init = function() {
 			field: 'DelayTemplate',
 			value: {
 				'command': 'delay',
-				'duration': ''
+				'delay': ''
 			}
 		},
 		{
@@ -172,7 +173,7 @@ exports.init = function() {
 		      "command": {
 		        "type": "string",
 		        "enum": [
-		          "run",
+		          //"run",
 		          "add",
 		          "set",
 		          "remove",
@@ -282,12 +283,12 @@ exports.init = function() {
 		        },
 		        "then": {
 		          "properties": {
-		            "duration": {
+		            "delay": {
 		              "type": "number"
 		            }
 		          },
 		          "required": [
-		            "duration"
+		            "delay"
 		          ]
 		        }
 		      },
@@ -409,6 +410,25 @@ exports.init = function() {
 	editor = new JSONEditor(document.getElementById('editorscript'), options)
 }
 
+function keyDown(e) {
+	let key = e.keyCode ? e.keyCode : e.which
+
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one' || e.target.type === 'password'))
+		return
+
+	let handled = true
+	if (key == 32) {
+		if (playing) {
+			clearInterval(playing)
+			playing = 0
+		} else playing = setInterval(playCutscene, 1000 / project.project.fps);
+	} else if (key == 37) controller.prevFrame()
+	else if (key == 39) controller.nextFrame()
+	else handled = false
+
+	if (handled) e.preventDefault()
+}
+
 function beforeUnload() {
 	if (!project.checkChanges())
 		return false
@@ -417,10 +437,14 @@ function beforeUnload() {
 function toggleSettings() {
 	if (document.getElementById('settings-panel').style.display == 'none') {
 		document.getElementById('settings-panel').style.display = 'block'
-		document.getElementById('chars').style.display = 'none'
+		document.getElementById('timeline').style.display = 'none'
+
+		document.getElementById('settings').classList.add('open-tab')
 	} else {
 		document.getElementById('settings-panel').style.display = 'none'
-		document.getElementById('chars').style.display = 'block'
+		document.getElementById('timeline').style.display = 'block'
+
+		document.getElementById('settings').classList.remove('open-tab')
 	}
 }
 
@@ -433,11 +457,6 @@ function colorpickerChange(e) {
 	project.project.greenScreen = e.target.value
 	controller.toggleGreenscreen()
 	controller.toggleGreenscreen()
-}
-
-function durationChange(e) {
-	project.project.duration = parseFloat(e.target.value)
-	controller.resize()
 }
 
 function fpsChange(e) {
@@ -468,11 +487,7 @@ function exportScript() {
 		{name: 'Text', extensions: ['txt']}
 		]
 	}, (file) => {
-<<<<<<< HEAD
 		if (file) fs.outputFile(file, JSON.stringify(editor.get()), null, 2)
-=======
-    	if (file) fs.outputFile(file, JSON.stringify(editor.get()), null, 2)
->>>>>>> abaed9e... Added json editor
 	})
 }
 
@@ -493,5 +508,12 @@ function toggleEditor() {
 		document.getElementById('screen').classList.remove('hidden')
 	} else {
 		document.getElementById('screen').classList.add('hidden')
+	}
+}
+
+function playCutscene() {
+	if (controller.nextFrame()) {
+		clearInterval(playing)
+		playing = 0
 	}
 }
