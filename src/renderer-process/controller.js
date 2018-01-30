@@ -97,7 +97,7 @@ exports.getThumbnail = function() {
 }
 
 exports.resize = function() {
-	stage.screen.style.height = (stage.screen.clientWidth * project.project.resolution.split("x")[1] / project.project.resolution.split("x")[0]) + "px"
+	stage.screen.style.height = Math.min(window.innerHeight - 320, (stage.screen.clientWidth * project.project.resolution.split("x")[1] / project.project.resolution.split("x")[0])) + "px"
 	
 	stage.resize(null, project.project.resolution.split("x")[0], project.project.resolution.split("x")[1])
 	stage.renderer.render(stage.stage)
