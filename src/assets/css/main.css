@@ -87,10 +87,11 @@ h4 {
 	height: calc( 100% - 320px );
 	padding: 0;
 	width: calc( 100% - 450px );
-	position: absolute;
-	left: 0;
-	top: 0;
+	position: relative;
 	transition: all .5s ease;
+    margin: 10px;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 .main canvas {
@@ -108,8 +109,6 @@ h4 {
 	margin-bottom: 0;
 	width: calc( 100% - 470px );
 	min-width: 234px;
-	position: absolute;
-	bottom: 10px;
 }
 
 .side {
@@ -160,8 +159,6 @@ h4 {
 	text-align: center;
 	width: calc( 100% - 470px );
 	overflow-y: overlay;
-	position: absolute;
-	bottom: 250px;
 }
 
 .status::-webkit-scrollbar {
@@ -550,10 +547,6 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
     color: lightgrey;
 }
 
-.hidden {
-	top: -100%;
-}
-
 .vert-scroll {
 	width: 100%;
     height: 100%;
@@ -651,4 +644,47 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 
 .lastFrame {
 	border-right: solid 2px white !important;
+}
+
+.box {
+	display: flex;
+	flex-flow: column;
+	height: 100%;
+}
+
+.box .main {
+	flex: 0 1 auto;
+}
+
+.box .bottom {
+	flex: 1 1 auto;
+}
+
+.box .status {
+	flex: 0 1 20px;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.editorwrapper {
+	overflow: hidden;
+    position: relative;
+    height: calc(100% + 20px);
+    margin: -10px;
+}
+
+.editorcontainer {
+	z-index: 2;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 100%;
+	transition: top .5s ease-in;
+	margin: 0;
+	padding: 0;
+}
+
+.hidden {
+	top: calc(-100% - 20px);
 }

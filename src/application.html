@@ -7,63 +7,68 @@
         <title>Babble Movie Maker</title>
     </head>
     <body>
-        <div id="editor" class="container main">
-            <div id="editorscript" class="editor"></div>
-            <button id="exportscript">Export</button>
-            <button id="cancelscript" style="float: right">Cancel</button>
-            <button id="savescript" style="float: right;">Save Script</button>
-        </div>
-        <div id="screen" class="container main"></div>
-        <div id="status" class="container status">Loading Interface...</div>
-        <div id="bottom" class="container bottom">
-            <div class="buttons s2">
-                <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label" style="width: 100%;">Green Screen</label>
-                <button id="settings" class="button-tab">Project Settings</button>
-                <button id="script">Edit Script</button>
-                <button id="export">Export Movie</button>
-            </div>
-            <div id="timeline" class="s8">
-                <div id="vert-scroll" class="vert-scroll">
-                    <div id="actors" class="actors"></div>
-                    <div id="time-scroll" class="horiz-scroll">
-                        <div id="frames" class="frames"></div>
+        <div class="box">
+            <div id="screen" class="main" style="height: 400px">
+                <div class="editorwrapper">
+                    <div id="editor" class="container editorcontainer hidden">
+                        <div id="editorscript" class="editor"></div>
+                        <button id="exportscript">Export</button>
+                        <button id="cancelscript" style="float: right">Cancel</button>
+                        <button id="savescript" style="float: right;">Save Script</button>
                     </div>
                 </div>
             </div>
-            <div id="settings-panel" class="s8 scroll" style="display: none;">
-                Green Screen Color:
-                <input type="color" id="colorpicker" value="#00FF00" style="width: calc(100% - 16px); margin-bottom: 0">
-                <h4>Stage Settings</h4>
-                <div class="s5">
-                    Puppet Scale:
-                    <input type="number" id="puppetscale" value="1" style="width: calc(100% - 16px)" step="0.1">
+            <div id="status" class="container status">Loading Interface...</div>
+            <div id="bottom" class="container bottom">
+                <div class="buttons s2">
+                    <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label" style="width: 100%;">Green Screen</label>
+                    <button id="settings" class="button-tab">Project Settings</button>
+                    <button id="script">Edit Script</button>
+                    <button id="export">Export Movie</button>
                 </div>
-                <div class="s5">
-                    Number of Slots:
-                    <input type="number" id="numslots" value="5" style="width: calc(100% - 16px)">
+                <div id="timeline" class="s8">
+                    <div id="vert-scroll" class="vert-scroll">
+                        <div id="actors" class="actors"></div>
+                        <div id="time-scroll" class="horiz-scroll">
+                            <div id="frames" class="frames"></div>
+                        </div>
+                    </div>
                 </div>
-                <br/>
-                <h4>Movie Settings</h4>
-                <div class="s5">
-                    Frames Per Second:
-                    <input type="number" id="fps" value="60" style="width: calc(100% - 16px); margin-bottom: 0">
-                </div>
-                <div class="s5">
-                    Resolution:
-                    <select id="resolutions">
-                        <option value="1024x768">1024x768</option>
-                        <option value="1280x720">1280x720</option>
-                        <option value="1280x1024">1280x1024</option>
-                        <option value="1360x768">1360x768</option>
-                        <option value="1366x768">1366x768</option>
-                        <option value="1440x900">1440x900</option>
-                        <option value="1600x900">1600x900</option>
-                        <option value="1680x1050">1680x1050</option>
-                        <option value="1920x1080">1920x1080</option>
-                        <option value="1920x1200">1920x1200</option>
-                        <option value="2560x1440">2560x1440</option>
-                        <option value="3840x2160">3840x2160</option>
-                    </select>
+                <div id="settings-panel" class="s8 scroll" style="display: none;">
+                    Green Screen Color:
+                    <input type="color" id="colorpicker" value="#00FF00" style="width: calc(100% - 16px); margin-bottom: 0">
+                    <h4>Stage Settings</h4>
+                    <div class="s5">
+                        Puppet Scale:
+                        <input type="number" id="puppetscale" value="1" style="width: calc(100% - 16px)" step="0.1">
+                    </div>
+                    <div class="s5">
+                        Number of Slots:
+                        <input type="number" id="numslots" value="5" style="width: calc(100% - 16px)">
+                    </div>
+                    <br/>
+                    <h4>Movie Settings</h4>
+                    <div class="s5">
+                        Frames Per Second:
+                        <input type="number" id="fps" value="60" style="width: calc(100% - 16px); margin-bottom: 0">
+                    </div>
+                    <div class="s5">
+                        Resolution:
+                        <select id="resolutions">
+                            <option value="1024x768">1024x768</option>
+                            <option value="1280x720">1280x720</option>
+                            <option value="1280x1024">1280x1024</option>
+                            <option value="1360x768">1360x768</option>
+                            <option value="1366x768">1366x768</option>
+                            <option value="1440x900">1440x900</option>
+                            <option value="1600x900">1600x900</option>
+                            <option value="1680x1050">1680x1050</option>
+                            <option value="1920x1080">1920x1080</option>
+                            <option value="1920x1200">1920x1200</option>
+                            <option value="2560x1440">2560x1440</option>
+                            <option value="3840x2160">3840x2160</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>

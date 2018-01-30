@@ -504,10 +504,10 @@ function toggleModal(string) {
 }
 
 function toggleEditor() {
-	if (document.getElementById('screen').classList.contains('hidden')) {
-		document.getElementById('screen').classList.remove('hidden')
+	if (document.getElementById('editor').classList.contains('hidden')) {
+		document.getElementById('editor').classList.remove('hidden')
 	} else {
-		document.getElementById('screen').classList.add('hidden')
+		document.getElementById('editor').classList.add('hidden')
 	}
 }
 

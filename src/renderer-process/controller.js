@@ -29,6 +29,8 @@ exports.init = function() {
 	project = remote.getGlobal('project').project
 	application.init()
 	stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, start, status, false)
+	stage.renderer.view.classList.add("container")
+	stage.renderer.view.style.padding = 0
 
 	// Set up a second renderer for use with the greenscreen
 	opague = PIXI.autoDetectRenderer(1, 1, {transparent: false})
@@ -95,8 +97,10 @@ exports.getThumbnail = function() {
 }
 
 exports.resize = function() {
+	stage.screen.style.height = (stage.screen.clientWidth * project.project.resolution.split("x")[1] / project.project.resolution.split("x")[0]) + "px"
+	
 	stage.resize(null, project.project.resolution.split("x")[0], project.project.resolution.split("x")[1])
-	stage.resize(null, project.project.resolution.split("x")[0], project.project.resolution.split("x")[1])
+	stage.renderer.render(stage.stage)
 }
 
 exports.toggleGreenscreen = function() {
