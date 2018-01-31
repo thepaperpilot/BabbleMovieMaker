@@ -2,6 +2,7 @@
 const remote = require('electron').remote
 const application = require('./application.js')
 const status = require('./status.js')
+const inspector = require('./inspector.js')
 const babble = require('babble.js')
 const Gif = require('./../lib/gif.js')
 const toDataURL = require('canvas-background').default
@@ -25,154 +26,15 @@ let frame
 let frames
 let keyframes
 let psuedoCutscene
-let inspectorTarget
-
-var commandFields = {
-	title: function(parent, field) {
-		let titleElement = document.createElement("h4")
-		titleElement.innerText = field.title
-		titleElement.addEventListener("click", foldAction)
-		
-		parent.appendChild(titleElement)
-	},
-	text: function(parent, field, action, key) {
-		let titleElement = document.createElement("p")
-		titleElement.innerText = field.title
-		
-		let textbox = document.createElement("input")
-		textbox.style.display = 'block'
-		textbox.type = "text"
-		textbox.action = action
-		textbox.key = key
-		textbox.value = action[key]
-		textbox.addEventListener("change", editAction)
-		
-		parent.appendChild(titleElement)
-		parent.appendChild(textbox)
-	},
-	number: function(parent, field, action, key) {
-		let titleElement = document.createElement("p")
-		titleElement.innerText = field.title
-		
-		let numberbox = document.createElement("input")
-		numberbox.style.display = 'block'
-		numberbox.type = "number"
-		numberbox.action = action
-		numberbox.key = key
-		numberbox.value = action[key]
-		numberbox.addEventListener("change", editAction)
-		
-		parent.appendChild(titleElement)
-		parent.appendChild(numberbox)
-	},
-	slider: function(parent, field, action, key) {
-		let titleElement = document.createElement("p")
-		titleElement.innerText = field.title
-		
-		let box = document.createElement("div")
-		box.style.display = "flex"
-
-		let minElement = document.createElement("span")
-		minElement.style.flex = "0 1 auto"
-		minElement.style.margin = "5px"
-		minElement.innerText = field.min
-
-		let slider = document.createElement("input")
-		slider.style.display = 'block'
-		slider.style.flex = "1 1 auto"
-		slider.type = "range"
-		slider.action = action
-		slider.key = key
-		slider.min = field.min
-		slider.max = field.max === "numCharacters" ? project.project.numCharacters + 1 : field.max
-		slider.value = action[key]
-		slider.addEventListener("change", editAction)
-
-		let maxElement = document.createElement("span")
-		maxElement.style.flex = "0 1 auto"
-		maxElement.style.margin = "5px"
-		maxElement.innerText = field.max === "numCharacters" ? project.project.numCharacters + 1 : field.max
-
-		box.appendChild(minElement)
-		box.appendChild(slider)
-		box.appendChild(maxElement)
-		
-		parent.appendChild(titleElement)
-		parent.appendChild(box)
-	},
-	checkbox: function(parent, field, action, key, index) {
-		let checkbox = document.createElement("input")
-		checkbox.id = action.command + " " + key + " " + index
-		checkbox.type = "checkbox"
-		checkbox.classList.add("checkbox")
-		checkbox.action = action
-		checkbox.key = key
-		checkbox.checked = action[key]
-		checkbox.addEventListener("change", checkAction)
-		
-		let label = document.createElement("label")
-		label.classList.add("checkbox-label")
-		label.setAttribute("for", action.command + " " + key + " " + index)
-		label.innerText = field.title
-		
-		parent.appendChild(checkbox)
-		parent.appendChild(label)
-	},
-	select: function(parent, field, action, key) {
-		let titleElement = document.createElement("p")
-		titleElement.innerText = field.title
-
-		let select = document.createElement("select")
-		select.action = action
-		select.key = key
-		select.addEventListener("change", editAction)
-
-		for (let i = 0; i < field.options.length; i++) {
-			let option = document.createElement("option")
-			option.text = field.options[i]
-			select.appendChild(option)
-		}
-
-		select.value = action[key]
-
-		parent.appendChild(titleElement)
-		parent.appendChild(select)
-	},
-	emote: function(parent, field, action, key) {
-		let titleElement = document.createElement("p")
-		titleElement.innerText = field.title
-
-		let select = document.createElement("select")
-		select.action = action
-		select.key = key
-		select.addEventListener("change", emoteAction)
-
-		// populate 
-		let puppet = action.name ? project.actors[action.name] : stage.getPuppet(action.target).container.puppet
-		let emotes = Object.keys(puppet.emotes)
-		for (let i = 0; i < emotes.length; i++) {
-			let emote = puppet.emotes[emotes[i]]
-			if (!emote.enabled) continue
-			let option = document.createElement("option")
-			option.text = emote.name
-			select.appendChild(option)
-		}
-
-		select.emotes = puppet.emotes
-		select.value = puppet.emotes[action[key]].name
-
-		parent.appendChild(titleElement)
-		parent.appendChild(select)
-	}
-}
 
 exports.init = function() {
 	project = remote.getGlobal('project').project
 	application.init()
 	stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, start, status, false)
-	stage.registerPuppetListener("click", updateInspector)
+	stage.registerPuppetListener("click", inspector.update)
 	stage.renderer.view.classList.add("container")
 	stage.renderer.view.style.padding = 0
+	inspector.init(stage)
 
 	// Set up a second renderer for use with the greenscreen
 	opague = PIXI.autoDetectRenderer(1, 1, {transparent: false})
@@ -190,7 +52,7 @@ exports.init = function() {
 exports.export = function() {
 	if (rendering !== 0) return
 	status.log('Rendering movie...', 2, 3)
-	gotoFrame(0)
+	exports.gotoFrame(0)
 
 	// TODO view changer
 	document.getElementById('screen').style.width = project.project.resolution.split("x")[0] + "px"
@@ -260,16 +122,18 @@ exports.toggleGreenscreen = function() {
 }
 
 exports.prevFrame = function() {
-	gotoFrame(frame == 0 ? frames : frame - 1)
+	exports.gotoFrame(frame === 0 ? frames : frame - 1)
 }
 
 // Returns true if cutscene finished
 exports.nextFrame = function() {
 	if (frame >= frames + bufferFrames + 1) return true
 	if (frame == frames) {
-		gotoFrame(0)
+		exports.gotoFrame(0)
 		return
 	}
+
+	stage.update(1000 / project.project.fps)
 
 	if (keyframes[++frame])
 		for (let i = 0; i < keyframes[frame].actions.length; i++) {
@@ -277,12 +141,87 @@ exports.nextFrame = function() {
 			psuedoCutscene.actions[action.command].call(psuedoCutscene, () => {}, action)
 		}
 
-	stage.update(1000 / project.project.fps)
+	stage.update(0)
 
 	updateTimeline()
 
 	return frame == frames
 }
+
+exports.gotoFrame = function(frameIndex) {
+	frameIndex = frameIndex.target ? frameIndex.target.frame : frameIndex
+	let nearestKeyframe = frame = frameIndex
+	while (!keyframes[nearestKeyframe])
+		nearestKeyframe--
+	let puppets = JSON.parse(JSON.stringify(keyframes[nearestKeyframe].puppets))
+	for (let i = 0; i < stage.puppets.length; i++) {
+		let puppet = stage.puppets[i]
+		let remove = true
+		for (let j = 0; j < puppets.length; j++) {
+			if (puppet.id === puppets[j].id) {
+				if (puppet.name !== puppets[j].name)
+					puppet = stage.setPuppet(puppet.id, stage.createPuppet(project.actors[puppets[j].name]))
+				Object.assign(puppet, puppets[j])
+				updatePuppet(puppet)
+				remove = false
+				puppets.splice(j--, 1)
+			}
+		}
+		if (remove) stage.removePuppet(puppet.id)
+	}
+
+	for (let i = 0; i < puppets.length; i++) {
+		let puppet = stage.addPuppet(stage.createPuppet(project.actors[puppets[i].name]), puppets[i].id)
+		Object.assign(puppet, puppets[i])
+		updatePuppet(puppet)
+	}
+
+	if (nearestKeyframe == frameIndex) stage.update(0)
+	else for (let i = 0; i < frameIndex - nearestKeyframe; i++)
+		stage.update(1000 / project.project.fps)
+
+	updateTimeline()
+}
+
+exports.simulateFromFrame = function() {
+	let origFrame = frame
+	let currentFrame = origFrame - 1
+	let actor = inspector.getTarget()
+	if (currentFrame === -1) stage.clearPuppets()
+	else exports.gotoFrame(currentFrame)
+
+	let keys = Object.keys(keyframes)
+	for (let i = 0; i < keys.length; i++) {
+		if (keys[i] < origFrame) continue
+
+		if (keys[i] == currentFrame) stage.update(0)
+		else for (let j = 0; j < keys[i] - currentFrame; j++)
+			stage.update(1000 / project.project.fps)
+		currentFrame = keys[i]
+		let keyframe = keyframes[keys[i]]
+
+		for (let j = 0; j < keyframe.actions.length; j++) {
+			let action = keyframe.actions[j]
+			psuedoCutscene.actions[action.command].call(psuedoCutscene, () => {}, action)
+		}
+
+		let puppets = []
+		for (let j = 0; j < stage.puppets.length; j++) {
+			let puppet = {}
+			for (let k = 0; k < puppetKeys.length; k++) {
+				puppet[puppetKeys[k]] = stage.puppets[j][puppetKeys[k]]
+			}
+			puppets.push(puppet)
+		}
+		keyframe.puppets = puppets
+	}
+
+	inspector.update({target: {id: actor, frame: origFrame}})
+}
+
+exports.getFrame = function() { return frame }
+exports.getFrames = function() { return frames }
+exports.getKeyframe = function(frame) { return keyframes[frame] }
 
 function start() {
 	if (stage) {
@@ -364,7 +303,7 @@ function readScript() {
 		domFrame.id = "frame " + i
 		domFrame.classList.add("frame")
 		domFrame.frame = i
-		domFrame.addEventListener("click", gotoFrame)
+		domFrame.addEventListener("click", exports.gotoFrame)
 		domFrames.appendChild(domFrame)
 		if (keyframes[i])
 			domFrame.classList.add("keyframe")
@@ -389,7 +328,7 @@ function readScript() {
 			domFrame.id = "actor " + i + " frame " + j
 			domFrame.actor = actors[i]
 			domFrame.frame = j
-			domFrame.addEventListener("click", updateInspector)
+			domFrame.addEventListener("click", inspector.update)
 			domFrame.classList.add("frame")
 			if (j == frames)
 				domFrame.classList.add("lastFrame")
@@ -402,42 +341,7 @@ function readScript() {
 		}
 	}
 
-	gotoFrame(0)
-}
-
-function gotoFrame(frameIndex) {
-	frameIndex = frameIndex.target ? frameIndex.target.frame : frameIndex
-	let nearestKeyframe = frame = frameIndex
-	while (!keyframes[nearestKeyframe])
-		nearestKeyframe--
-	let puppets = JSON.parse(JSON.stringify(keyframes[nearestKeyframe].puppets))
-	for (let i = 0; i < stage.puppets.length; i++) {
-		let puppet = stage.puppets[i]
-		let remove = true
-		for (let j = 0; j < puppets.length; j++) {
-			if (puppet.id === puppets[j].id) {
-				if (puppet.name !== puppets[j].name)
-					puppet = stage.setPuppet(puppet.id, stage.createPuppet(project.actors[puppets[j].name]))
-				Object.assign(puppet, puppets[j])
-				updatePuppet(puppet)
-				remove = false
-				puppets.splice(j--, 1)
-			}
-		}
-		if (remove) stage.removePuppet(puppet.id)
-	}
-
-	for (let i = 0; i < puppets.length; i++) {
-		let puppet = stage.addPuppet(stage.createPuppet(project.actors[puppets[i].name]), puppets[i].id)
-		Object.assign(puppet, puppets[i])
-		updatePuppet(puppet)
-	}
-
-	console.log("Simulating " + (frameIndex - nearestKeyframe) + " frames (" + (frameIndex - nearestKeyframe) * 1000 / project.project.fps + " ms)")
-	for (let i = 0; i < frameIndex - nearestKeyframe; i++)
-		stage.update(1000 / project.project.fps)
-
-	updateTimeline()
+	exports.gotoFrame(0)
 }
 
 function updatePuppet(puppet) {
@@ -476,7 +380,7 @@ function updateTimeline() {
 	currentFrame.classList.add("currentframe")
 
 	// Update inspector
-	updateInspector()
+	inspector.update()
 
 	// Calculate where the current frame is on the timeline
 	let timeline = document.getElementById("time-scroll")
@@ -515,93 +419,4 @@ function renderFrame() {
 		document.getElementById('side').style.display = ''
 		exports.resize()
 	}
-}
-
-function updateInspector(actor) {
-	let newFrame = actor && 'frame' in actor.target ? actor.target.frame : null
-	let id = actor ? 'actor' in actor.target ? actor.target.actor : actor.target.id : null
-
-	if (newFrame !== null) gotoFrame(newFrame)
-	inspectorTarget = id
-	document.getElementById("inspectorTarget").innerText = id ? id : "Frame " + (frame + 1)
-	document.getElementById("framecount").innerText = (frame + 1) + " / " + (frames + 1)
-
-	let actions = document.getElementById("actions")
-	actions.innerHTML = ''
-
-	if (keyframes[frame])
-		for (let i = 0; i < keyframes[frame].actions.length; i++) {
-			let action = keyframes[frame].actions[i]
-			if (id === null && (action.id || action.target) || id !== null && !(action.id === id || action.target === id)) continue
-			if (project.project.commands[action.command]) {
-				let command  = project.project.commands[action.command]
-				let actionElement = document.createElement("div")
-				actionElement.classList.add("action")
-				commandFields.title(actionElement, {title: command.title})
-				let fields = Object.keys(command.fields)
-				for (let j = 0; j < fields.length; j++) {
-					let fieldGenerator = commandFields[command.fields[fields[j]].type]
-					if (fieldGenerator) 
-						fieldGenerator(actionElement, command.fields[fields[j]], action, fields[j], i)
-				}
-				actions.appendChild(actionElement)
-			}
-		}
-}
-
-function foldAction(e) {
-	let classList = e.target.parentNode.classList
-
-	if (classList.contains("folded"))
-		classList.remove("folded")
-	else classList.add("folded")
-}
-
-function editAction(e) {
-	e.target.action[e.target.key] = e.target.value
-	simulateFromFrame()
-}
-
-function checkAction(e) {
-	e.target.action[e.target.key] = e.target.checked
-	simulateFromFrame()
-}
-
-function emoteAction(e) {
-	e.target.action[e.target.key] = e.target.emotes.findIndex((emote) => emote.name === e.target.value)
-	simulateFromFrame()
-}
-
-function simulateFromFrame() {
-	let origFrame = frame
-	let currentFrame = origFrame - 1
-	let actor = inspectorTarget
-	if (currentFrame === -1) stage.clearPuppets()
-	else gotoFrame(currentFrame)
-
-	let keys = Object.keys(keyframes)
-	for (let i = 0; i < keys.length; i++) {
-		if (keys[i] < origFrame) continue
-
-		stage.update((keys[i] - currentFrame) * 1000 / project.project.fps)
-		currentFrame = keys[i]
-		let keyframe = keyframes[keys[i]]
-
-		for (let i = 0; i < keyframe.actions.length; i++) {
-			let action = keyframe.actions[i]
-			psuedoCutscene.actions[action.command].call(psuedoCutscene, () => {}, action)
-		}
-
-		let puppets = []
-		for (let i = 0; i < stage.puppets.length; i++) {
-			let puppet = {}
-			for (let j = 0; j < puppetKeys.length; j++) {
-				puppet[puppetKeys[j]] = stage.puppets[i][puppetKeys[j]]
-			}
-			puppets.push(puppet)
-		}
-		keyframe.puppets = puppets
-	}
-
-	updateInspector({target: {id: actor, frame: origFrame}})
 }
