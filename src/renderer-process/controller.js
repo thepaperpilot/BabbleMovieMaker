@@ -12,6 +12,7 @@ const url = require('url')
 // Constants
 const bufferFrames = 100	// How many frames to extend the timeline after the last action is completed
 const scrollPadding = 50	// When current frame loses visibility, how far it places the currentframe from the opposite edge
+const puppetKeys = ["babbling", "id", "position", "target", "facingLeft", "eyes", "mouths", "deadbonesStyle", "movingAnim", "eyesAnim", "mouthAnim", "deadbonesAnim", "eyesDuration", "mouthDuration", "deadbonesDuration", "deadbonesTargetY", "deadbonesStartY", "deadbonesTargetRotation", "deadbonesStartRotation", "eyeBabbleDuration", "mouthBabbleDuration", "name"]
 
 // Vars
 let project
@@ -24,6 +25,7 @@ let frame
 let frames
 let keyframes
 let psuedoCutscene
+let inspectorTarget
 
 var commandFields = {
 	title: function(parent, field) {
@@ -319,9 +321,11 @@ function readScript() {
         if (action.target && !actors.includes(action.target))
         	actors.push(action.target)
 
-        // Add to keyframe        
-        if (!keyframes[frame]) keyframes[frame] = { actions: [] }
-        keyframes[frame].actions.push(action)
+        // Add to keyframe
+        if (project.project.commands[action.command]) {
+	        if (!keyframes[frame]) keyframes[frame] = { actions: [] }
+	        keyframes[frame].actions.push(action)
+        }
 
         // Run action
         if (action.wait) {
@@ -337,7 +341,6 @@ function readScript() {
         }
     }
 	cutscene.start()
-	let puppetKeys = ["babbling", "id", "position", "target", "facingLeft", "eyes", "mouths", "deadbonesStyle", "movingAnim", "eyesAnim", "mouthAnim", "deadbonesAnim", "eyesDuration", "mouthDuration", "deadbonesDuration", "deadbonesTargetY", "deadbonesStartY", "deadbonesTargetRotation", "deadbonesStartRotation", "eyeBabbleDuration", "mouthBabbleDuration", "name"]
 	while (!frames || frame < frames + bufferFrames) {
 		let puppets = []
 		for (let i = 0; i < stage.puppets.length; i++) {
@@ -431,7 +434,8 @@ function gotoFrame(frameIndex) {
 	}
 
 	console.log("Simulating " + (frameIndex - nearestKeyframe) + " frames (" + (frameIndex - nearestKeyframe) * 1000 / project.project.fps + " ms)")
-	stage.update((frameIndex - nearestKeyframe) * 1000 / project.project.fps)
+	for (let i = 0; i < frameIndex - nearestKeyframe; i++)
+		stage.update(1000 / project.project.fps)
 
 	updateTimeline()
 }
@@ -518,6 +522,7 @@ function updateInspector(actor) {
 	let id = actor ? 'actor' in actor.target ? actor.target.actor : actor.target.id : null
 
 	if (newFrame !== null) gotoFrame(newFrame)
+	inspectorTarget = id
 	document.getElementById("inspectorTarget").innerText = id ? id : "Frame " + (frame + 1)
 	document.getElementById("framecount").innerText = (frame + 1) + " / " + (frames + 1)
 
@@ -528,7 +533,6 @@ function updateInspector(actor) {
 		for (let i = 0; i < keyframes[frame].actions.length; i++) {
 			let action = keyframes[frame].actions[i]
 			if (id === null && (action.id || action.target) || id !== null && !(action.id === id || action.target === id)) continue
-			console.log(action)
 			if (project.project.commands[action.command]) {
 				let command  = project.project.commands[action.command]
 				let actionElement = document.createElement("div")
@@ -555,12 +559,49 @@ function foldAction(e) {
 
 function editAction(e) {
 	e.target.action[e.target.key] = e.target.value
+	simulateFromFrame()
 }
 
 function checkAction(e) {
 	e.target.action[e.target.key] = e.target.checked
+	simulateFromFrame()
 }
 
 function emoteAction(e) {
 	e.target.action[e.target.key] = e.target.emotes.findIndex((emote) => emote.name === e.target.value)
+	simulateFromFrame()
+}
+
+function simulateFromFrame() {
+	let origFrame = frame
+	let currentFrame = origFrame - 1
+	let actor = inspectorTarget
+	if (currentFrame === -1) stage.clearPuppets()
+	else gotoFrame(currentFrame)
+
+	let keys = Object.keys(keyframes)
+	for (let i = 0; i < keys.length; i++) {
+		if (keys[i] < origFrame) continue
+
+		stage.update((keys[i] - currentFrame) * 1000 / project.project.fps)
+		currentFrame = keys[i]
+		let keyframe = keyframes[keys[i]]
+
+		for (let i = 0; i < keyframe.actions.length; i++) {
+			let action = keyframe.actions[i]
+			psuedoCutscene.actions[action.command].call(psuedoCutscene, () => {}, action)
+		}
+
+		let puppets = []
+		for (let i = 0; i < stage.puppets.length; i++) {
+			let puppet = {}
+			for (let j = 0; j < puppetKeys.length; j++) {
+				puppet[puppetKeys[j]] = stage.puppets[i][puppetKeys[j]]
+			}
+			puppets.push(puppet)
+		}
+		keyframe.puppets = puppets
+	}
+
+	updateInspector({target: {id: actor, frame: origFrame}})
 }
