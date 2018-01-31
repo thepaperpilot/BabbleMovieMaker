@@ -45,6 +45,27 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:foc
 	outline: none;
 }
 
+input[type="range"] {
+	transition: opacity .3s;
+	opacity: 0.7;
+	outline: none;
+	border: solid 1px #969696;
+	-webkit-appearance: none;
+	height: 15px;
+	background: #2a323d;
+    border-radius: 10px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 25px;
+	height: 25px;
+	border-radius: 50%;
+	background: #242a33;
+	border: solid 1px #c9c9c9;
+	cursor: pointer;
+}
+
 button {
 	background: none;
 	border: none;
@@ -550,7 +571,7 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 .vert-scroll {
 	width: 100%;
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: overlay;
     position: relative;
 }
 
@@ -640,6 +661,7 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 	position: absolute;
 	top: 0;
 	left: 5px;
+	pointer-events: none;
 }
 
 .lastFrame {
@@ -687,4 +709,35 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 
 .hidden {
 	top: calc(-100% - 20px);
+}
+
+.framecount {
+	position: absolute;
+    top: 35px;
+    right: 10px;
+    font-size: 12pt;
+    background-color: grey;
+    border-radius: 8px;
+    padding: 2px 4px;
+}
+
+.action {
+	transition: max-height .5s;
+	overflow: hidden;
+}
+
+.action.folded {
+	max-height: 41px;
+}
+
+.folded h4 {
+	border-bottom-color: grey;
+}
+
+.action p {
+	margin: 0;
+}
+
+.side .checkbox-label, .side select {
+	margin-bottom: 24px;
 }

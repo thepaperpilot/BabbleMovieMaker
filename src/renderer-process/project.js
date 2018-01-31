@@ -9,13 +9,136 @@ const status = require('./status')
 
 const path = require('path')
 
-module.exports = exports = remote.getGlobal('project').project = {
-    // project: {},
-    // actors: {},
-    // assets: {},
-    // assetsPath: "",
-    // numCharacters: 0,
-    // scripts: []
+module.exports = {
+    defaults: {
+    	"clientVersion": "1.0.0",
+    	"numCharacters": 5,
+    	"puppetScale": 1,
+    	"greenScreen": "#00FF00",
+    	"duration": 5,
+    	"fps": 60,
+    	"resolution": "1280x720",
+    	"commands": {
+    		"add": {
+				"title": "Add to Stage",
+				"fields": {
+					"name": {
+						"title": "Puppet",
+						"type": "text",
+						"default": ""
+					},
+					"id": {
+						"type": "id"
+					},
+					"position": {
+						"title": "Position",
+						"type": "slider",
+						"min": 0,
+						"max": "numCharacters",
+						"default": 0
+					},
+					"facingLeft": {
+						"title": "Facing Left",
+						"type": "checkbox",
+						"default": false
+					},
+					"emote": {
+						"title": "Emote",
+						"type": "emote",
+						"default": "0"
+					}
+				}
+			},
+			"set": {
+				"title": "Change Puppet",
+				"fields": {
+					"target": {
+						"type": "id"
+					},
+					"name": {
+						"title": "Puppet",
+						"type": "text",
+						"default": ""
+					}
+				}
+			},
+			"remove": {
+				"title": "Remove from Stage",
+				"fields": {
+					"target": {
+						"type": "id"
+					}
+				}
+			},
+			"move": {
+				"title": "Move to Position",
+				"fields": {
+					"target": {
+						"type": "id"
+					},
+					"position": {
+						"title": "Position",
+						"type": "slider",
+						"min": 0,
+						"max": "numCharacters",
+						"default": 0
+					}
+				}
+			},
+			"facingLeft": {
+				"title": "Change Direction",
+				"fields": {
+					"target": {
+						"type": "id"
+					},
+					"facingLeft": {
+						"title": "Facing Left",
+						"type": "checkbox",
+						"default": false
+					}
+				}
+			},
+			"babble": {
+				"title": "Toggle Babbling",
+				"fields": {
+					"target": {
+						"type": "id"
+					},
+					"action": {
+						"title": "Babbling",
+						"type": "select",
+						"options": [
+							"toggle",
+							"start",
+							"stop"
+						],
+						"default": "toggle"
+					}
+				}
+			},
+			"emote": {
+				"title": "Change Emote",
+				"fields": {
+					"target": {
+						"type": "id"
+					},
+					"emote": {
+						"title": "Emote",
+						"type": "emote",
+						"default": "0"
+					}
+				}
+			},
+			"jiggle": {
+				"title": "Jiggle Up and Down",
+				"fields": {
+					"target": {
+						"type": "id"
+					}
+				}
+			}
+    	}
+    },
 	readProject: function() {
 		if (!this.checkChanges()) return
 
@@ -31,7 +154,8 @@ module.exports = exports = remote.getGlobal('project').project = {
 			
 			remote.getGlobal('project').project = this
 
-			this.project = proj
+			this.project = Object.assign({}, this.defaults)
+			Object.assign(this.project, proj)
 			this.assets = fs.readJsonSync(path.join(filepath, '..', 'assets.json'))
 			this.actors = fs.readJsonSync(path.join(filepath, '..', 'actors.json'))
 			this.scripts = fs.readJsonSync(path.join(filepath, '..', 'scripts.json'))
