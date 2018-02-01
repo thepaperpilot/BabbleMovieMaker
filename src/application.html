@@ -76,7 +76,12 @@
             <h3 id="inspectorTarget" style="margin-bottom: 0">Frame 1</h3>
             <div id="framecount" class="framecount">1 / 1</div>
             <hr>
-            <div id="actions" class="vert-scroll" style="height: calc(100% - 75px)"></div>
+            <div id="actions" class="vert-scroll" style="height: calc(100% - 120px)"></div>
+            <button id="addActionButton" class="footbutton"><hr/>Add Action</button>
+            <div id="addActionPanel" class="footpanel collapsed">
+                <input type="search" id="actionSearch" placeholder="Search Actions...">
+                <div id="actionsList" class="vert-scroll" style="height: calc(100% - 31px);"></div>
+            </div>
         </div>
         <div id="instructions" style="display: none;">
             <iframe src="./instructions.html" style="width: 100%; height: 500px;" frameborder=0></iframe>

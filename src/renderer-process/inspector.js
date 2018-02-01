@@ -58,7 +58,7 @@ var commandFields = {
 		slider.min = field.min
 		slider.max = field.max === "numCharacters" ? project.project.numCharacters + 1 : field.max
 		slider.value = action[key]
-		slider.addEventListener("change", editNumber)
+		slider.addEventListener("input", editNumber)
 
 		let maxElement = document.createElement("span")
 		maxElement.style.flex = "0 1 auto"
@@ -141,6 +141,8 @@ var commandFields = {
 exports.init = function(mainStage) {
 	project = remote.getGlobal('project').project
 	window.stage = stage = mainStage
+	document.getElementById("addActionButton").addEventListener("click", toggleActionPanel)
+	document.getElementById("actionSearch").addEventListener("input", searchCommands)
 }
 
 exports.update = function(actor) {
@@ -148,6 +150,24 @@ exports.update = function(actor) {
 	let id = actor ? 'actor' in actor.target ? actor.target.actor : actor.target.id : null
 
 	if (newFrame !== null) controller.gotoFrame(newFrame)
+	// if target is set XOR id is set
+	// this means we are transitioning from being on a frame to an actor, or vice versa
+	if ((target === null) != (id === null)) {
+		let actions = document.getElementById("actionsList")
+		actions.innerHTML = ''
+		let needsId = (id !== null)
+		let commands = Object.keys(project.project.commands)
+		for (let i = 0; i < commands.length; i++) {
+			let action = project.project.commands[commands[i]]
+			if (needsId == ('id' in action.fields || 'target' in action.fields)) {
+				let actionElement = document.createElement("div")
+				actionElement.innerText = action.title
+				actionElement.command = commands[i]
+				actionElement.addEventListener("click", addCommand)
+				actions.appendChild(actionElement)
+			}
+		}
+	}
 	target = id
 	let frame = controller.getFrame()
 	let frames = controller.getFrames()
@@ -214,4 +234,30 @@ function editCheck(e) {
 function editEmote(e) {
 	e.target.action[e.target.key] = e.target.emotes.findIndex((emote) => emote.name === e.target.value)
 	controller.simulateFromFrame()
+}
+
+function toggleActionPanel() {
+	let classes = document.getElementById("addActionPanel").classList
+	if (classes.contains("collapsed")) classes.remove("collapsed")
+	else classes.add("collapsed")
+}
+
+function searchCommands(e) {
+	let actions = document.getElementById('actionsList')
+    if (e.target.value === '') {
+        for (let i = 0; i < actions.children.length; i++)
+            actions.children[i].style.display = 'block'
+    } else {
+        for (let i = 0; i < actions.children.length; i++)
+            actions.children[i].style.display = 'none'
+        let commands = Array.from(actions.children).filter(el => el.textContent.toLowerCase().includes(e.target.value.toLowerCase()))
+        for (let i = 0; i < commands.length; i++) {
+            commands[i].style.display = 'block'
+        }
+	}
+}
+
+function addCommand(e) {
+	controller.addCommand(e.target.command)
+	toggleActionPanel()
 }

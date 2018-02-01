@@ -148,7 +148,7 @@ exports.nextFrame = function() {
 	return frame == frames
 }
 
-exports.gotoFrame = function(frameIndex) {
+exports.gotoFrame = function(frameIndex, update = true) {
 	frameIndex = frameIndex.target ? frameIndex.target.frame : frameIndex
 	let nearestKeyframe = frame = frameIndex
 	while (!keyframes[nearestKeyframe])
@@ -180,7 +180,7 @@ exports.gotoFrame = function(frameIndex) {
 	else for (let i = 0; i < frameIndex - nearestKeyframe; i++)
 		stage.update(1000 / project.project.fps)
 
-	updateTimeline()
+	if (update) updateTimeline()
 }
 
 exports.simulateFromFrame = function() {
@@ -188,7 +188,7 @@ exports.simulateFromFrame = function() {
 	let currentFrame = origFrame - 1
 	let actor = inspector.getTarget()
 	if (currentFrame === -1) stage.clearPuppets()
-	else exports.gotoFrame(currentFrame)
+	else exports.gotoFrame(currentFrame, false)
 
 	let keys = Object.keys(keyframes)
 	for (let i = 0; i < keys.length; i++) {
@@ -216,7 +216,25 @@ exports.simulateFromFrame = function() {
 		keyframe.puppets = puppets
 	}
 
-	inspector.update({target: {id: actor, frame: origFrame}})
+	exports.gotoFrame(origFrame, false)
+}
+
+exports.addCommand = function(command) {
+	let action = {
+		command: command
+	}
+	let fields = Object.keys(project.project.commands[command].fields)
+	for (let i = 0; i < fields.length; i++) {
+		let field = project.project.commands[command].fields[fields[i]]
+		action[fields[i]] = fields[i] === "id" || fields[i] === "target" ? inspector.getTarget() : field.default
+	}
+	console.log(keyframes)
+	console.log(action)
+	if (!keyframes[frame]) keyframes[frame] = { actions: [] }
+        keyframes[frame].actions.push(action)
+
+    exports.simulateFromFrame()
+    inspector.update({target: {frame: frame, id: inspector.getTarget()}})
 }
 
 exports.getFrame = function() { return frame }
