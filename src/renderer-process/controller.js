@@ -25,6 +25,7 @@ let transparent
 let frame
 let frames
 let keyframes
+let actors
 let psuedoCutscene
 
 exports.init = function() {
@@ -138,7 +139,9 @@ exports.nextFrame = function() {
 	if (keyframes[++frame])
 		for (let i = 0; i < keyframes[frame].actions.length; i++) {
 			let action = keyframes[frame].actions[i]
-			psuedoCutscene.actions[action.command].call(psuedoCutscene, () => {}, action)
+			try {
+				psuedoCutscene.actions[action.command].call(psuedoCutscene, () => {}, action)
+			} catch (e) {}
 		}
 
 	stage.update(0)
@@ -171,7 +174,7 @@ exports.gotoFrame = function(frameIndex, update = true) {
 	}
 
 	for (let i = 0; i < puppets.length; i++) {
-		let puppet = stage.addPuppet(stage.createPuppet(project.actors[puppets[i].name]), puppets[i].id)
+		let puppet = stage.addPuppet(project.actors[puppets[i].name], puppets[i].id)
 		Object.assign(puppet, puppets[i])
 		updatePuppet(puppet)
 	}
@@ -186,7 +189,6 @@ exports.gotoFrame = function(frameIndex, update = true) {
 exports.simulateFromFrame = function() {
 	let origFrame = frame
 	let currentFrame = origFrame - 1
-	let actor = inspector.getTarget()
 	if (currentFrame === -1) stage.clearPuppets()
 	else exports.gotoFrame(currentFrame, false)
 
@@ -200,9 +202,22 @@ exports.simulateFromFrame = function() {
 		currentFrame = keys[i]
 		let keyframe = keyframes[keys[i]]
 
+		document.getElementById("frame " + currentFrame).classList.remove("warning")
+		for (let j = 0; j < actors.length; j++)
+			document.getElementById("actor " + j + " frame " + currentFrame).classList.remove("warning")
+
 		for (let j = 0; j < keyframe.actions.length; j++) {
 			let action = keyframe.actions[j]
-			psuedoCutscene.actions[action.command].call(psuedoCutscene, () => {}, action)
+			action.error = null
+			try {
+				psuedoCutscene.actions[action.command].call(psuedoCutscene, () => {}, action)
+			} catch (e) {
+				action.error = e.message
+				document.getElementById("frame " + currentFrame).classList.add("warning")
+				let actor = "id" in action ? action.id : 'target' in action ? action.target : null
+				if (actor !== null)
+					document.getElementById("actor " + actors.indexOf(actor) + " frame " + currentFrame).classList.add("warning")
+			}
 		}
 
 		let puppets = []
@@ -228,10 +243,15 @@ exports.addCommand = function(command) {
 		let field = project.project.commands[command].fields[fields[i]]
 		action[fields[i]] = fields[i] === "id" || fields[i] === "target" ? inspector.getTarget() : field.default
 	}
-	console.log(keyframes)
-	console.log(action)
-	if (!keyframes[frame]) keyframes[frame] = { actions: [] }
-        keyframes[frame].actions.push(action)
+	if (!keyframes[frame]) {
+		keyframes[frame] = { actions: [] }
+		document.getElementById("frame " + frame).classList.add("keyframe")
+		let actor = "id" in action ? action.id : 'target' in action ? action.target : null
+		if (actor !== null) {
+			document.getElementById("actor " + actors.indexOf(actor) + " frame " + frame).classList.add("keyframe")
+		}
+	}
+    keyframes[frame].actions.push(action)
 
     exports.simulateFromFrame()
     inspector.update({target: {frame: frame, id: inspector.getTarget()}})
@@ -255,7 +275,7 @@ function readScript() {
 	keyframes = {}
 	let frame = frames = 0
 	let cutscene = new babble.Cutscene(stage, project.scripts, project.actors, () => { frames = frame })
-	let actors = []
+	actors = []
 	cutscene.parseNextAction = function(script, callback) {
         // Check if script is complete
         if (script.length === 0) {
@@ -275,8 +295,9 @@ function readScript() {
         }
 
         // Check for actors
-        if (action.target && !actors.includes(action.target))
-        	actors.push(action.target)
+        let actor = "id" in action ? action.id : 'target' in action ? action.target : null
+        if (actor !== null && !actors.includes(actor))
+        	actors.push(actor)
 
         // Add to keyframe
         if (project.project.commands[action.command]) {
@@ -290,10 +311,25 @@ function readScript() {
             let newCallback = function() {
                 this.parseNextAction(script.slice(1), callback)
             }.bind(this)
-            this.actions[action.command].call(this, newCallback, action)
+            try {
+				this.actions[action.command].call(this, newCallback, action)
+			} catch (e) {
+				action.error = e.message
+				document.getElementById("frame " + frame).classList.add("warning")				
+				if (actor !== null)
+					document.getElementById("actor " + actors.indexOf(actor) + " frame " + frame).classList.add("warning")
+				newCallback()
+			}
         } else {
             // Perform this action and immediately continue
-            this.actions[action.command].call(this, this.empty, action)
+            try {
+				this.actions[action.command].call(this, this.empty, action)
+			} catch (e) {
+				action.error = e.message
+				document.getElementById("frame " + frame).classList.add("warning")				
+				if (actor !== null)
+					document.getElementById("actor " + actors.indexOf(actor) + " frame " + frame).classList.add("warning")
+			}
             this.parseNextAction(script.slice(1), callback)
         }
     }

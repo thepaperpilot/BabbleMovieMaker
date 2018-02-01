@@ -6,6 +6,10 @@ let project
 let stage
 let target
 
+// Used for clicking add command menu
+let addActionPanel
+let addActionButton
+
 var commandFields = {
 	text: function(parent, field, action, key) {
 		let titleElement = document.createElement("p")
@@ -120,18 +124,20 @@ var commandFields = {
 		select.addEventListener("change", editEmote)
 
 		// populate 
-		let puppet = action.name ? project.actors[action.name] : stage.getPuppet(action.target).container.puppet
-		let emotes = Object.keys(puppet.emotes)
-		for (let i = 0; i < emotes.length; i++) {
-			let emote = puppet.emotes[emotes[i]]
-			if (!emote.enabled) continue
-			let option = document.createElement("option")
-			option.text = emote.name
-			select.appendChild(option)
-		}
+		let puppet = action.name ? project.actors[action.name] : stage.getPuppet(action.target) ? stage.getPuppet(action.target).container.puppet : null
+		if (puppet !== null) {
+			let emotes = Object.keys(puppet.emotes)
+			for (let i = 0; i < emotes.length; i++) {
+				let emote = puppet.emotes[emotes[i]]
+				if (!emote.enabled) continue
+				let option = document.createElement("option")
+				option.text = emote.name
+				select.appendChild(option)
+			}
 
-		select.emotes = puppet.emotes
-		select.value = puppet.emotes[action[key]].name
+			select.emotes = puppet.emotes
+			select.value = puppet.emotes[action[key]].name
+		}
 
 		parent.appendChild(titleElement)
 		parent.appendChild(select)
@@ -141,7 +147,9 @@ var commandFields = {
 exports.init = function(mainStage) {
 	project = remote.getGlobal('project').project
 	window.stage = stage = mainStage
-	document.getElementById("addActionButton").addEventListener("click", toggleActionPanel)
+	document.addEventListener("click", toggleActionPanel)
+	addActionButton = document.getElementById("addActionButton")
+	addActionPanel = document.getElementById("addActionPanel")
 	document.getElementById("actionSearch").addEventListener("input", searchCommands)
 }
 
@@ -193,6 +201,12 @@ exports.update = function(actor) {
 					if (fieldGenerator) 
 						fieldGenerator(actionElement, command.fields[fields[j]], action, fields[j], i)
 				}
+				if (action.error) {
+					let error = document.createElement("div")
+					error.classList.add("error")
+					error.innerText = action.error
+					actionElement.appendChild(error)
+				}
 				actions.appendChild(actionElement)
 			}
 		}
@@ -236,10 +250,25 @@ function editEmote(e) {
 	controller.simulateFromFrame()
 }
 
-function toggleActionPanel() {
-	let classes = document.getElementById("addActionPanel").classList
-	if (classes.contains("collapsed")) classes.remove("collapsed")
-	else classes.add("collapsed")
+function toggleActionPanel(e) {
+	if (!e || !checkParent(e.target, addActionPanel)) {
+		let classes = document.getElementById("addActionPanel").classList
+		if (!!e && checkParent(e.target, addActionButton)) {
+			if (classes.contains("collapsed")) {
+				classes.remove("collapsed")
+				document.getElementById("actionSearch").focus()
+			} else classes.add("collapsed")
+		} else classes.add("collapsed")
+	}
+}
+
+// https://siongui.github.io/2015/02/13/hide-div-when-clicked-outside-it/
+function checkParent(t, elm) {
+  while(t.parentNode) {
+    if( t == elm ) {return true;}
+    t = t.parentNode;
+  }
+  return false;
 }
 
 function searchCommands(e) {
