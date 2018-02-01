@@ -247,13 +247,35 @@ exports.addCommand = function(command) {
 		keyframes[frame] = { actions: [] }
 		document.getElementById("frame " + frame).classList.add("keyframe")
 		let actor = "id" in action ? action.id : 'target' in action ? action.target : null
-		if (actor !== null) {
+		if (actor !== null)
 			document.getElementById("actor " + actors.indexOf(actor) + " frame " + frame).classList.add("keyframe")
-		}
 	}
     keyframes[frame].actions.push(action)
 
     exports.simulateFromFrame()
+    inspector.update({target: {frame: frame, id: inspector.getTarget()}})
+}
+
+exports.removeCommand = function(action) {
+	keyframes[frame].actions.splice(keyframes[frame].actions.indexOf(action), 1)
+	let actor = "id" in action ? action.id : 'target' in action ? action.target : null
+	if (actor !== null) {
+		let hasKeyframe = false
+		for (let i = 0; i < keyframes[frame].actions.length; i++) {
+			let action = keyframes[frame].actions[i]
+			let compareActor = "id" in action ? action.id : 'target' in action ? action.target : null
+			if (actor == compareActor) {
+				hasKeyframe = true
+			}
+		}
+		if (!hasKeyframe) document.getElementById("actor " + actors.indexOf(actor) + " frame " + frame).classList.remove("keyframe")
+	}
+	if (keyframes[frame].actions.length === 0) {
+		delete keyframes[frame]
+		document.getElementById("frame " + frame).classList.remove("keyframe")
+	}
+	
+	exports.simulateFromFrame()
     inspector.update({target: {frame: frame, id: inspector.getTarget()}})
 }
 

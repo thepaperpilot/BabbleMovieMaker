@@ -5,6 +5,7 @@ const controller = require('./controller')
 let project
 let stage
 let target
+let dropdowns = []
 
 // Used for clicking add command menu
 let addActionPanel
@@ -148,6 +149,7 @@ exports.init = function(mainStage) {
 	project = remote.getGlobal('project').project
 	window.stage = stage = mainStage
 	document.addEventListener("click", toggleActionPanel)
+	document.addEventListener("click", closeDropdowns)
 	addActionButton = document.getElementById("addActionButton")
 	addActionPanel = document.getElementById("addActionPanel")
 	document.getElementById("actionSearch").addEventListener("input", searchCommands)
@@ -185,6 +187,7 @@ exports.update = function(actor) {
 
 	let actions = document.getElementById("actions")
 	actions.innerHTML = ''
+	dropdowns = []
 
 	if (keyframe)
 		for (let i = 0; i < keyframe.actions.length; i++) {
@@ -194,7 +197,7 @@ exports.update = function(actor) {
 				let command  = project.project.commands[action.command]
 				let actionElement = document.createElement("div")
 				actionElement.classList.add("action")
-				addTitle(actionElement, {title: command.title})
+				addTitle(actionElement, action, i)
 				let fields = Object.keys(command.fields)
 				for (let j = 0; j < fields.length; j++) {
 					let fieldGenerator = commandFields[command.fields[fields[j]].type]
@@ -214,12 +217,38 @@ exports.update = function(actor) {
 
 exports.getTarget = function() { return target }
 
-function addTitle(parent, field) {
+function addTitle(parent, action, i) {
 	let titleElement = document.createElement("h4")
-	titleElement.innerText = field.title
+	titleElement.innerText = project.project.commands[action.command].title
+	titleElement.style.cursor = "pointer"
 	titleElement.addEventListener("click", foldAction)
+
+	let settings = document.createElement("div")
+	let checkbox = document.createElement("input")
+	checkbox.id = "settings " + i
+	checkbox.type = "checkbox"
+	checkbox.classList.add("dropdown")
+	let label = document.createElement("label")
+	label.setAttribute('for', "settings " + i)
+	let button = document.createElement("button")
+	button.classList.add("dropdown-image")
+	button.title = "Action Settings"
+	button.style.backgroundImage = 'url("./assets/icons/settings.png")'
+	label.appendChild(button)
+	let dropdown = document.createElement("ul")
+	dropdown.classList.add("dropdown-content")
+	dropdown.action = action
+	let remove = document.createElement("li")
+	remove.innerText = "Remove Action"
+	remove.addEventListener("click", removeCommand)
+	dropdown.appendChild(remove)
+	settings.appendChild(checkbox)
+	settings.appendChild(label)
+	settings.appendChild(dropdown)
+	dropdowns.push(checkbox)
 	
 	parent.appendChild(titleElement)
+	parent.appendChild(settings)
 }
 
 function foldAction(e) {
@@ -262,6 +291,14 @@ function toggleActionPanel(e) {
 	}
 }
 
+function closeDropdowns(e) {
+	for (let i = 0; i < dropdowns.length; i++) {
+		if (!checkParent(e.target, dropdowns[i])) {
+			dropdowns[i].checked = false
+		}
+	}
+}
+
 // https://siongui.github.io/2015/02/13/hide-div-when-clicked-outside-it/
 function checkParent(t, elm) {
   while(t.parentNode) {
@@ -289,4 +326,8 @@ function searchCommands(e) {
 function addCommand(e) {
 	controller.addCommand(e.target.command)
 	toggleActionPanel()
+}
+
+function removeCommand(e) {
+	controller.removeCommand(e.target.parentNode.action)
 }

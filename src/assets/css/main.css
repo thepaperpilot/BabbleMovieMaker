@@ -213,6 +213,7 @@ h4 {
 .scroll {
 	overflow-x: hidden;
 	overflow-y: overlay;
+	padding-right: 16px;
 }
 
 .contain {
@@ -488,9 +489,11 @@ h4 {
 
 .dropdown ~ label {
 	cursor: pointer;
-	margin-right: 10px;
-	padding-left: 4px;
-	margin-left: 6px;
+	position: absolute;
+    top: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
 }
 
 .dropdown:checked ~ .dropdown-content {
@@ -519,8 +522,8 @@ h4 {
     background-color: #2a323d;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 2;
-    left: 11px;
-    top: 44px;
+    right: 0;
+    top: 29px;
     font-size: 16px;
 }
 
@@ -534,11 +537,10 @@ h4 {
 }
 
 .dropdown-image {
-	width: 25px;
-	height: 25px;
-	padding: 16px;
-	margin: -4px -4px -4px -9px;
-	background-size: 70% !important;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	background-size: contain;
 	vertical-align: middle;
 }
 
@@ -568,18 +570,60 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
     color: lightgrey;
 }
 
-.vert-scroll {
-	width: 100%;
+.scroll::-webkit-scrollbar {
+    width: 14px;
+    height: 18px;
+}
+.scroll::-webkit-scrollbar-thumb {
+    height: 6px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    -webkit-border-radius: 7px;
+    background-color: rgba(0, 0, 0, 0.15);
+    -webkit-box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+.scroll::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+}
+.scroll::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+.horiz-scroll::-webkit-scrollbar {
+    width: 18px;
+    height: 14px;
+}
+.horiz-scroll::-webkit-scrollbar-thumb {
+    height: 6px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    -webkit-border-radius: 7px;
+    background-color: rgba(0, 0, 0, 0.15);
+    -webkit-box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+.horiz-scroll::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+}
+.horiz-scroll::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+.s8 .scroll {
     height: 100%;
-    overflow-y: overlay;
-    position: relative;
+    position: relative;    
+    margin-right: -8px;
 }
 
 .actors {
 	display: inline-block;
     width: 100px;
     padding-top: 29px;
-	border-right: solid 1px white;
+	margin-right: -5px;
+    vertical-align: top;
 }
 
 .actors .actor, .horiz-scroll .actor {
@@ -609,11 +653,13 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
     white-space: nowrap;
     overflow-x: scroll;
     overflow-y: hidden;
-    height: calc(100% - 5px);
-    width: calc(100% - 105px);
+    height: 100%;
+    width: calc(100% - 101px);
     display: inline-block;
-    position: absolute;
-    top: 0;
+    padding-bottom: 16px;
+    margin-bottom: -8px;
+    border: 1px solid white;
+    box-sizing: border-box;
 }
 
 .frames {
@@ -654,12 +700,13 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 .currentframe::before {
 	content: "";
 	z-index: 2;
-	background: white;
-	width: 1px;
+	background: #5261cf;
+	width: 2px;
 	height: 1000px;
 	position: absolute;
 	top: 0;
-	left: 5px;
+	left: 50%;
+	transform: translateX(-50%);
 	pointer-events: none;
 }
 
@@ -723,6 +770,7 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 .action {
 	transition: max-height .5s;
 	overflow: hidden;
+	position: relative;
 }
 
 .action.folded {
@@ -808,6 +856,7 @@ input[type="search"]::-webkit-search-cancel-button {
     padding: 8px 16px 8px 40px;
     position: relative;
     margin: 8px;
+    margin-bottom: 24px;
 }
 
 .error:before {

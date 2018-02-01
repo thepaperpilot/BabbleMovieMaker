@@ -26,15 +26,13 @@
                     <button id="script">Edit Script</button>
                     <button id="export">Export Movie</button>
                 </div>
-                <div id="timeline" class="s8">
-                    <div id="vert-scroll" class="vert-scroll">
-                        <div id="actors" class="actors"></div>
-                        <div id="time-scroll" class="horiz-scroll">
-                            <div id="frames" class="frames"></div>
-                        </div>
+                <div id="timeline" class="s8 scroll">
+                    <div id="actors" class="actors"></div>
+                    <div id="time-scroll" class="horiz-scroll">
+                        <div id="frames" class="frames"></div>
                     </div>
                 </div>
-                <div id="settings-panel" class="s8 scroll" style="display: none;">
+                <div id="settings-panel" class="s8 scroll" style="display: none; position: relative">
                     Green Screen Color:
                     <input type="color" id="colorpicker" value="#00FF00" style="width: calc(100% - 16px); margin-bottom: 0">
                     <h4>Stage Settings</h4>
@@ -76,11 +74,11 @@
             <h3 id="inspectorTarget" style="margin-bottom: 0">Frame 1</h3>
             <div id="framecount" class="framecount">1 / 1</div>
             <hr>
-            <div id="actions" class="vert-scroll" style="height: calc(100% - 120px)"></div>
+            <div id="actions" class="scroll" style="height: calc(100% - 120px); margin-right: -8px;"></div>
             <button id="addActionButton" class="footbutton"><hr/>Add Action</button>
             <div id="addActionPanel" class="footpanel collapsed">
                 <input type="search" id="actionSearch" placeholder="Search Actions...">
-                <div id="actionsList" class="vert-scroll" style="height: calc(100% - 31px);"></div>
+                <div id="actionsList" class="scroll" style="height: calc(100% - 31px);"></div>
             </div>
         </div>
         <div id="instructions" style="display: none;">
