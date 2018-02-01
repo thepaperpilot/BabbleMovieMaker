@@ -487,7 +487,7 @@ h4 {
     display: none;
 }
 
-.dropdown ~ label {
+.dropdown + label {
 	cursor: pointer;
 	position: absolute;
     top: 0;
@@ -496,40 +496,39 @@ h4 {
     height: 32px;
 }
 
-.dropdown:checked ~ .dropdown-content {
-	max-height: 300px;
-	transition: max-height 0.2s ease-in;
-	position: absolute;
-}
-
 .dropdown-image {
 	pointer-events: none;
 }
 
-.dropdown:checked ~ label .dropdown-image {
+.dropdown:checked + label .dropdown-image {
 	background-color: #2a323d !important;
 	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 	pointer-events: unset;
 }
 
 .dropdown-content {
-	max-height: 0;
+	max-height: 300px;
+	transition: max-height 0.2s ease-in;
 	padding: 0;
 	margin: 0;
 	overflow: hidden;
-	transition: max-height 0.2s ease-out;
-	position: absolute;
+	position: fixed;
     background-color: #2a323d;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 2;
-    right: 0;
-    top: 29px;
+    transform: translateX(-100%);
     font-size: 16px;
+}
+
+.dropdown-content.collapsed {
+	max-height: 0;
+	transition: max-height 0.2s ease-out;
 }
 
 .dropdown-content li {
 	padding: 6px;
 	cursor: pointer;
+	white-space: nowrap;
 }
 
 .dropdown-content li:hover {
@@ -618,11 +617,11 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
     margin-right: -8px;
 }
 
-.actors {
-	display: inline-block;
+.actors-container {	
+    display: inline-block;
+    margin-right: -5px;
     width: 100px;
-    padding-top: 29px;
-	margin-right: -5px;
+    height: 100%;
     vertical-align: top;
 }
 
@@ -633,12 +632,17 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 }
 
 .actors .actor {
-	background: #333c4a;
+	background: #242a33;
     height: 21px;
     padding: 4px;
     width: calc(100% - 8px);
     overflow: hidden;
     text-overflow: ellipsis;
+    cursor: default;
+}
+
+.actors .actor:hover {
+	background: #333c4a;
 }
 
 .horiz-scroll .actor:not(:first-child) {
@@ -646,19 +650,19 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 }
 
 .actors .actor:not(:first-child) {
-	border-top: solid 1px;
+	border-top: solid 1px dimgrey;
+    height: 20px;
 }
 
 .horiz-scroll {
     white-space: nowrap;
     overflow-x: scroll;
     overflow-y: hidden;
-    height: 100%;
+    min-height: 100%;
     width: calc(100% - 101px);
     display: inline-block;
-    padding-bottom: 16px;
     margin-bottom: -8px;
-    border: 1px solid white;
+    border: 1px solid dimgrey;
     box-sizing: border-box;
 }
 
@@ -670,12 +674,17 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 .frames .frame, .actor .frame {
 	width: 12px;
     height: 100%;
-    border: solid 1px;
+    border: solid 1px dimgrey;
     border-left-color: rgba(1,1,1,.5);
     border-right-color: rgba(1,1,1,.5);
     position: relative;
     display: inline-block;
     box-sizing: border-box;
+    cursor: pointer;
+}
+
+.frames .frame {
+    border-top: none;
 }
 
 .keyframe::after {
@@ -690,19 +699,23 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 }
 
 .frame:nth-child(odd) {
-	background: #333c4a;
+	background: #242a33;
 }
 
 .frame:not(:first-child) {
 	margin-left: -1px;
 }
 
-.currentframe::before {
+.frame:hover, .currentframe {
+	background: #333c4a !important;
+}
+
+.frames .currentframe::before {
 	content: "";
 	z-index: 2;
 	background: #5261cf;
 	width: 2px;
-	height: 1000px;
+	height: 10000000000px;
 	position: absolute;
 	top: 0;
 	left: 50%;

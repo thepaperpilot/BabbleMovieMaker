@@ -36,6 +36,7 @@ exports.init = function() {
 	stage.renderer.view.classList.add("container")
 	stage.renderer.view.style.padding = 0
 	inspector.init(stage)
+	document.getElementById('addActor').addEventListener('click', newActor)
 
 	// Set up a second renderer for use with the greenscreen
 	opague = PIXI.autoDetectRenderer(1, 1, {transparent: false})
@@ -282,6 +283,7 @@ exports.removeCommand = function(action) {
 exports.getFrame = function() { return frame }
 exports.getFrames = function() { return frames }
 exports.getKeyframe = function(frame) { return keyframes[frame] }
+exports.getActors = function() { return actors }
 
 function start() {
 	if (stage) {
@@ -387,34 +389,8 @@ function readScript() {
 			domFrame.classList.add("lastFrame")
 	}
 
-	let domActors = document.getElementById("actors")
-	let domTimeline = document.getElementById("time-scroll")
 	for (let i = 0; i < actors.length; i++) {
-		let domActor = document.createElement("div")
-		domActor.id = "actor " + i
-		domActor.classList.add("actor")
-		domActor.innerText = actors[i]
-		domActors.appendChild(domActor)
-		domActor = document.createElement("div")
-		domActor.id = "timeline actor " + i
-		domActor.classList.add("actor")
-		domTimeline.appendChild(domActor)
-		for (let j = 0; j < frames + bufferFrames; j++) {
-			let domFrame = document.createElement("div")
-			domFrame.id = "actor " + i + " frame " + j
-			domFrame.actor = actors[i]
-			domFrame.frame = j
-			domFrame.addEventListener("click", inspector.update)
-			domFrame.classList.add("frame")
-			if (j == frames)
-				domFrame.classList.add("lastFrame")
-			domActor.appendChild(domFrame)
-			if (keyframes[j])
-				for (let k = 0; k < keyframes[j].actions.length; k++) {
-					if (keyframes[j].actions[k].target === actors[i] || keyframes[j].actions[k].id === actors[i])
-						domFrame.classList.add("keyframe")
-				}
-		}
+		addActor(i)
 	}
 
 	exports.gotoFrame(0)
@@ -472,6 +448,47 @@ function updateTimeline() {
     	// We need to scroll right
     	timeline.scrollLeft += rect.right - (timeline.clientWidth + timelineRect.left) + width
     }
+}
+
+function newActor() {
+	let name = "actor"
+	let i = 1
+	while (actors.includes(name))
+		name = "actor" + (i++)
+	actors.push(name)
+
+	addActor(actors.length - 1)
+}
+
+function addActor(i) {
+	let domActors = document.getElementById("actors")
+	let domTimeline = document.getElementById("time-scroll")
+	let domActor = document.createElement("div")
+
+	domActor.id = "actor " + i
+	domActor.classList.add("actor")
+	domActor.innerText = actors[i]
+	domActors.appendChild(domActor)
+	domActor = document.createElement("div")
+	domActor.id = "timeline actor " + i
+	domActor.classList.add("actor")
+	domTimeline.appendChild(domActor)
+	for (let j = 0; j < frames + bufferFrames; j++) {
+		let domFrame = document.createElement("div")
+		domFrame.id = "actor " + i + " frame " + j
+		domFrame.actor = actors[i]
+		domFrame.frame = j
+		domFrame.addEventListener("click", inspector.update)
+		domFrame.classList.add("frame")
+		if (j == frames)
+			domFrame.classList.add("lastFrame")
+		domActor.appendChild(domFrame)
+		if (keyframes[j])
+			for (let k = 0; k < keyframes[j].actions.length; k++) {
+				if (keyframes[j].actions[k].target === actors[i] || keyframes[j].actions[k].id === actors[i])
+					domFrame.classList.add("keyframe")
+			}
+	}
 }
 
 function renderFrame() {

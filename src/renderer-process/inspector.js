@@ -148,10 +148,12 @@ var commandFields = {
 exports.init = function(mainStage) {
 	project = remote.getGlobal('project').project
 	window.stage = stage = mainStage
+	window.onresize = () => {toggleDropdowns()}
 	document.addEventListener("click", toggleActionPanel)
-	document.addEventListener("click", closeDropdowns)
+	document.addEventListener("click", toggleDropdowns)
 	addActionButton = document.getElementById("addActionButton")
 	addActionPanel = document.getElementById("addActionPanel")
+	document.getElementById("actions").addEventListener("wheel", () => {toggleDropdowns()})
 	document.getElementById("actionSearch").addEventListener("input", searchCommands)
 }
 
@@ -184,6 +186,13 @@ exports.update = function(actor) {
 	let keyframe = controller.getKeyframe(frame)
 	document.getElementById("inspectorTarget").innerText = id ? id : "Frame " + (frame + 1)
 	document.getElementById("framecount").innerText = (frame + 1) + " / " + (frames + 1)
+	// Remove actor's currentFrame indicator, but not the frame's currentFrame indicator
+	let node = document.body.getElementsByClassName("currentframe")[1]
+	while (node) {
+		node.classList.remove("currentframe")
+		node = document.body.getElementsByClassName("currentframe")[1]
+	}
+	if (id) document.getElementById("actor " + controller.getActors().indexOf(id) + " frame " + frame).classList.add("currentframe")
 
 	let actions = document.getElementById("actions")
 	actions.innerHTML = ''
@@ -196,6 +205,7 @@ exports.update = function(actor) {
 			if (project.project.commands[action.command]) {
 				let command  = project.project.commands[action.command]
 				let actionElement = document.createElement("div")
+				actions.appendChild(actionElement)
 				actionElement.classList.add("action")
 				addTitle(actionElement, action, i)
 				let fields = Object.keys(command.fields)
@@ -210,7 +220,6 @@ exports.update = function(actor) {
 					error.innerText = action.error
 					actionElement.appendChild(error)
 				}
-				actions.appendChild(actionElement)
 			}
 		}
 }
@@ -223,7 +232,6 @@ function addTitle(parent, action, i) {
 	titleElement.style.cursor = "pointer"
 	titleElement.addEventListener("click", foldAction)
 
-	let settings = document.createElement("div")
 	let checkbox = document.createElement("input")
 	checkbox.id = "settings " + i
 	checkbox.type = "checkbox"
@@ -235,20 +243,22 @@ function addTitle(parent, action, i) {
 	button.title = "Action Settings"
 	button.style.backgroundImage = 'url("./assets/icons/settings.png")'
 	label.appendChild(button)
+
 	let dropdown = document.createElement("ul")
 	dropdown.classList.add("dropdown-content")
+	dropdown.classList.add("collapsed")
 	dropdown.action = action
 	let remove = document.createElement("li")
 	remove.innerText = "Remove Action"
 	remove.addEventListener("click", removeCommand)
 	dropdown.appendChild(remove)
-	settings.appendChild(checkbox)
-	settings.appendChild(label)
-	settings.appendChild(dropdown)
-	dropdowns.push(checkbox)
+	dropdowns.push({checkbox, dropdown, button})
 	
 	parent.appendChild(titleElement)
-	parent.appendChild(settings)
+	parent.appendChild(checkbox)
+	parent.appendChild(label)
+	// Get out of the action overflow, but stay in actionsList so we get removed automatically
+	parent.parentNode.appendChild(dropdown)
 }
 
 function foldAction(e) {
@@ -291,11 +301,33 @@ function toggleActionPanel(e) {
 	}
 }
 
-function closeDropdowns(e) {
+function toggleDropdowns(e) {
 	for (let i = 0; i < dropdowns.length; i++) {
-		if (!checkParent(e.target, dropdowns[i])) {
-			dropdowns[i].checked = false
+		if (!e) {
+			dropdowns[i].checkbox.checked = false
+			dropdowns[i].dropdown.classList.add("collapsed")
+			continue
 		}
+
+		if (!checkParent(e.target, dropdowns[i].checkbox)) {
+			dropdowns[i].checkbox.checked = false
+			dropdowns[i].dropdown.classList.add("collapsed")
+		} else if (dropdowns[i].checkbox.checked) {
+			dropdowns[i].dropdown.classList.remove("collapsed")
+			let rect = dropdowns[i].button.getBoundingClientRect()
+			dropdowns[i].dropdown.style.top = rect.bottom + "px"
+			dropdowns[i].dropdown.style.left = rect.right + "px"
+		} else dropdowns[i].dropdown.classList.add("collapsed")
+	}
+}
+
+function updateDropdownPositions() {
+	let content = document.body.querySelector('.dropdown-content:not(.collapsed)')
+	if (content) {
+		let dropdown = dropdowns.filter(dd => dd.dropdown == content)[0]
+		let rect = dropdown.button.getBoundingClientRect()
+		content.style.top = rect.bottom + "px"
+		content.style.left = rect.right + "px"
 	}
 }
 
