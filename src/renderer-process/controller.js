@@ -20,12 +20,11 @@ let rendering = 0
 let opague
 let transparent
 
-exports.stage = null
 exports.puppetKeys = puppetKeys
 
 exports.init = function() {
 	// Creating stage as a global, because f*** it
-	window.stage = exports.stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, start, status, false)
+	window.stage = new babble.Stage('screen', project.project, project.assets, project.assetsPath, start, status, false)
 	stage.registerPuppetListener("click", (e) => { inspector.update(actors.actors.indexOf(e.target.id)) })
 	stage.renderer.view.classList.add("container")
 	stage.renderer.view.style.padding = 0

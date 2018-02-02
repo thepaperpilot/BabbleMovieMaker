@@ -118,7 +118,7 @@ function renameActor(e) {
 		if (inspector.target === e.target.actor)
 			document.getElementById("inspectorTarget").innerText = e.target.value
 		
-		let puppet = controller.stage.getPuppet(exports.actors[e.target.actor])
+		let puppet = stage.getPuppet(exports.actors[e.target.actor])
 		if (puppet) puppet.id = puppet.container.id = e.target.value
 		
 		exports.actors[e.target.actor] = e.target.value
@@ -130,8 +130,8 @@ function removeActor(e) {
 	let actor = e.target.parentNode.actor
 	let id = exports.actors[actor]
 
-	controller.stage.removePuppet(id)
-	controller.stage.update(0)
+	stage.removePuppet(id)
+	stage.update(0)
 	exports.actors[actor] = null
 
 	if (inspector.target == actor) inspector.update(-1)
@@ -153,7 +153,7 @@ function removeActor(e) {
 		}
 	}
 
-	timeline.simulateFromFrame()
+	timeline.resimulate()
 }
 
 function toggleDropdowns(e) {

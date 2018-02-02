@@ -94,8 +94,8 @@ exports.gotoFrame = function(frameIndex, update = true) {
 	if (update) updateTimeline(!!frameIndex.target)
 }
 
-exports.simulateFromFrame = function() {
-	let origFrame = exports.frame
+exports.simulateFromFrame = function(frame) {
+	let origFrame = frame == null ? exports.frame : frame // jshint ignore:line
 	let currentFrame = origFrame - 1
 	if (currentFrame === -1) stage.clearPuppets()
 	else exports.gotoFrame(currentFrame, false)
@@ -141,6 +141,10 @@ exports.simulateFromFrame = function() {
 	}
 
 	exports.gotoFrame(origFrame, false)
+}
+
+exports.resimulate = function() {
+	exports.simulateFromFrame(0)
 }
 
 function updatePuppet(puppet) {
