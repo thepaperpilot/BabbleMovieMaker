@@ -591,6 +591,10 @@ h4 {
     margin-right: -8px;
 }
 
+.actors {
+	position: relative;
+}
+
 .actors-container {	
     display: inline-block;
     margin-right: -5px;
@@ -618,16 +622,14 @@ h4 {
     position: relative;
 }
 
-.actors input.actor {
+.actors .actor input[type="text"] {
     margin: 0;
     border-bottom: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.actors input.actor:hover {
-	border-bottom: none;
-}
-
-.actor .dropdown + label {
+.actors .dropdown + label {
     width: 24px;
     height: 24px;
     top: 50%;

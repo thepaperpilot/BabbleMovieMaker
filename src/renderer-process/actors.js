@@ -19,17 +19,19 @@ exports.init = function() {
 exports.addActor = function(i) {
 	let domActors = document.getElementById("actors")
 	let domTimeline = document.getElementById("time-scroll")
-	let domActor = document.createElement("input")
+	let domActor = document.createElement("div")
 
-	domActor.type = "text"
 	domActor.id = "actor " + i
 	domActor.classList.add("actor")
-	domActor.value = exports.actors[i]
-	domActor.actor = i
-	domActor.addEventListener("mouseleave", () => {toggleDropdowns()})
-	domActor.addEventListener("change", renameActor)
-	domActor.addEventListener("keyup", renameActor)
 	domActors.appendChild(domActor)
+	
+	let name = document.createElement("input")
+	name.type = "text"
+	name.value = exports.actors[i]
+	name.actor = i
+	name.addEventListener("mouseleave", () => {toggleDropdowns()})
+	name.addEventListener("change", renameActor)
+	name.addEventListener("keyup", renameActor)
 
 	let checkbox = document.createElement("input")
 	checkbox.id = "settings " + i
@@ -53,6 +55,7 @@ exports.addActor = function(i) {
 	dropdown.appendChild(remove)
 	dropdowns.push({checkbox, dropdown, button})
 
+	domActor.appendChild(name)
 	domActor.appendChild(checkbox)
 	domActor.appendChild(label)
 	domActor.appendChild(dropdown)
