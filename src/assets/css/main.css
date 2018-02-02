@@ -613,14 +613,18 @@ h4 {
     width: calc(100% - 8px);
     overflow: hidden;
     text-overflow: ellipsis;
-    cursor: default;
     border-top: solid 1px dimgrey;
     border-left: solid 1px dimgrey;
     position: relative;
 }
 
-.actors .actor:hover {
-	background: #333c4a;
+.actors input.actor {
+    margin: 0;
+    border-bottom: none;
+}
+
+.actors input.actor:hover {
+	border-bottom: none;
 }
 
 .actor .dropdown + label {
@@ -639,7 +643,7 @@ h4 {
 	margin-top: -1px;
 }
 
-.actors .actor:last-child {
+.actors .actor:last-child, .actors .actor:last-child:hover {
 	border-bottom: solid 1px dimgrey;
 }
 
@@ -742,8 +746,8 @@ h4 {
 
 .framecount {
 	position: absolute;
-    top: 35px;
-    right: 10px;
+    top: 10px;
+    right: 8px;
     font-size: 12pt;
     background-color: grey;
     border-radius: 8px;
@@ -770,6 +774,13 @@ h4 {
 
 .side .checkbox-label, .side select {
 	margin-bottom: 24px;
+}
+
+.side h3 {
+	margin-bottom: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .footbutton {

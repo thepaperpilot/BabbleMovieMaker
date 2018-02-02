@@ -187,7 +187,7 @@ exports.update = function(actor) {
 	let frames = timeline.frames
 	let keyframe = timeline.keyframes[frame]
 	document.getElementById("inspectorTarget").innerText = id !== null ? id : "Frame " + (frame + 1)
-	document.getElementById("framecount").innerText = (frame + 1) + " / " + (frames + 1)
+	document.getElementById("framecount").innerText = "Frame " + (frame + 1) + " / " + (frames + 1)
 
 	// Remove actor's currentFrame indicator, but not the frame's currentFrame indicator
 	let node = document.body.getElementsByClassName("currentframe")[1]

@@ -19,12 +19,16 @@ exports.init = function() {
 exports.addActor = function(i) {
 	let domActors = document.getElementById("actors")
 	let domTimeline = document.getElementById("time-scroll")
-	let domActor = document.createElement("div")
+	let domActor = document.createElement("input")
 
+	domActor.type = "text"
 	domActor.id = "actor " + i
 	domActor.classList.add("actor")
-	domActor.innerText = exports.actors[i]
+	domActor.value = exports.actors[i]
+	domActor.actor = i
 	domActor.addEventListener("mouseleave", () => {toggleDropdowns()})
+	domActor.addEventListener("change", renameActor)
+	domActor.addEventListener("keyup", renameActor)
 	domActors.appendChild(domActor)
 
 	let checkbox = document.createElement("input")
@@ -89,6 +93,34 @@ function newActor() {
 	exports.actors.push(name)
 
 	exports.addActor(exports.actors.length - 1)
+}
+
+function renameActor(e) {
+	e.preventDefault()
+	if (e.type === "change" || e.keyCode === 13) {
+		e.target.blur()
+		
+		let keyframes = Object.keys(timeline.keyframes)
+		for (let i = 0; i < keyframes.length; i++) {
+			let keyframe = timeline.keyframes[keyframes[i]]
+			for (let j = 0; j < keyframe.actions.length; j++) {
+				let action = keyframe.actions[j]
+				if (action.target === exports.actors[e.target.actor])
+					action.target = e.target.value
+				else if (action.id === exports.actors[e.target.actor])
+					action.id = e.target.value
+			}
+		}
+		
+		if (inspector.target === e.target.actor)
+			document.getElementById("inspectorTarget").innerText = e.target.value
+		
+		let puppet = controller.stage.getPuppet(exports.actors[e.target.actor])
+		if (puppet) puppet.id = puppet.container.id = e.target.value
+		
+		exports.actors[e.target.actor] = e.target.value
+		timeline.simulateFromFrame()
+	}
 }
 
 function removeActor(e) {
