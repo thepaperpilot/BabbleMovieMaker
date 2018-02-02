@@ -23,7 +23,6 @@
     "electron": "~1.7.11",
     "electron-window-state": "~4.1.1",
     "fs-extra": "~3.0.1",
-    "jsoneditor": "^5.9.6",
     "vanilla-modal": "1.6.2"
   }
 }

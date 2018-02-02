@@ -543,32 +543,6 @@ h4 {
 	vertical-align: middle;
 }
 
-.editor {
-	resize: none;
-    background: transparent;
-    width: calc(100% - 17px);
-    height: 500px;
-    color: white;
-    padding: 8px;
-    height: calc(100% - 64px);
-}
-
-div.jsoneditor-field, div.jsoneditor-value, div.jsoneditor td, div.jsoneditor th, div.jsoneditor textarea, .jsoneditor-schema-error {
-    color: white;
-}
-
-div.jsoneditor-tree button.jsoneditor-expanded {
-    background-position: 72px -72px;
-}
-
-div.jsoneditor-tree button.jsoneditor-collapsed {
-    background-position: 96px -72px;
-}
-
-div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-value.jsoneditor-array {
-    color: lightgrey;
-}
-
 .scroll::-webkit-scrollbar {
     width: 14px;
     height: 18px;
@@ -760,25 +734,6 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 	flex: 0 1 20px;
 	margin-top: 0;
 	margin-bottom: 0;
-}
-
-.editorwrapper {
-	overflow: hidden;
-    position: relative;
-    height: calc(100% + 20px);
-    margin: -10px;
-}
-
-.editorcontainer {
-	z-index: 2;
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 100%;
-	transition: top .5s ease-in;
-	margin: 0;
-	padding: 0;
 }
 
 .hidden {
