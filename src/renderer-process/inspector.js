@@ -1,10 +1,10 @@
-const remote = require('electron').remote
-const controller = require('./controller')
+//Imports
+const project = require('./project')
+const timeline = require('./timeline')
+const actors = require('./actors')
+const utility = require('./utility')
 
 // Vars
-let project
-let stage
-let target
 let dropdowns = []
 
 // Used for clicking add command menu
@@ -63,7 +63,7 @@ var commandFields = {
 		slider.min = field.min
 		slider.max = field.max === "numCharacters" ? project.project.numCharacters + 1 : field.max
 		slider.value = action[key]
-		slider.addEventListener("input", editNumber)
+		slider.addEventListener("input", editSlider)
 
 		let maxElement = document.createElement("span")
 		maxElement.style.flex = "0 1 auto"
@@ -125,7 +125,9 @@ var commandFields = {
 		select.addEventListener("change", editEmote)
 
 		// populate 
-		let puppet = action.name ? project.actors[action.name] : stage.getPuppet(action.target) ? stage.getPuppet(action.target).container.puppet : null
+		let puppet = action.name ? project.actors[action.name] : 
+			stage.getPuppet(action.target) ? 
+			stage.getPuppet(action.target).container.puppet : null
 		if (puppet !== null) {
 			let emotes = Object.keys(puppet.emotes)
 			for (let i = 0; i < emotes.length; i++) {
@@ -145,10 +147,10 @@ var commandFields = {
 	}
 }
 
-exports.init = function(mainStage) {
-	project = remote.getGlobal('project').project
-	window.stage = stage = mainStage
-	window.onresize = () => {toggleDropdowns()}
+exports.target = null
+
+exports.init = function() {
+	window.addEventListener("resize", () => {toggleDropdowns()})
 	document.addEventListener("click", toggleActionPanel)
 	document.addEventListener("click", toggleDropdowns)
 	addActionButton = document.getElementById("addActionButton")
@@ -161,10 +163,10 @@ exports.update = function(actor) {
 	let newFrame = actor && 'frame' in actor.target ? actor.target.frame : null
 	let id = actor ? 'actor' in actor.target ? actor.target.actor : actor.target.id : null
 
-	if (newFrame !== null) controller.gotoFrame(newFrame)
+	if (newFrame !== null) timeline.gotoFrame(newFrame)
 	// if target is set XOR id is set
 	// this means we are transitioning from being on a frame to an actor, or vice versa
-	if ((target === null) != (id === null)) {
+	if ((exports.target === null) != (id === null)) {
 		let actions = document.getElementById("actionsList")
 		actions.innerHTML = ''
 		let needsId = (id !== null)
@@ -180,19 +182,20 @@ exports.update = function(actor) {
 			}
 		}
 	}
-	target = id
-	let frame = controller.getFrame()
-	let frames = controller.getFrames()
-	let keyframe = controller.getKeyframe(frame)
+	exports.target = id
+	let frame = timeline.frame
+	let frames = timeline.frames
+	let keyframe = timeline.keyframes[frame]
 	document.getElementById("inspectorTarget").innerText = id ? id : "Frame " + (frame + 1)
 	document.getElementById("framecount").innerText = (frame + 1) + " / " + (frames + 1)
+
 	// Remove actor's currentFrame indicator, but not the frame's currentFrame indicator
 	let node = document.body.getElementsByClassName("currentframe")[1]
 	while (node) {
 		node.classList.remove("currentframe")
 		node = document.body.getElementsByClassName("currentframe")[1]
 	}
-	if (id) document.getElementById("actor " + controller.getActors().indexOf(id) + " frame " + frame).classList.add("currentframe")
+	if (id) document.getElementById("actor " + actors.actors.indexOf(id) + " frame " + frame).classList.add("currentframe")
 
 	let actions = document.getElementById("actions")
 	actions.innerHTML = ''
@@ -224,7 +227,56 @@ exports.update = function(actor) {
 		}
 }
 
-exports.getTarget = function() { return target }
+function addCommand(e) {
+	let command = e.target.command
+	let keyframe = timeline.keyframes[timeline.frame]
+
+	let action = {
+		command: command
+	}
+	let fields = Object.keys(project.project.commands[command].fields)
+	for (let i = 0; i < fields.length; i++) {
+		let field = project.project.commands[command].fields[fields[i]]
+		action[fields[i]] = fields[i] === "id" || fields[i] === "target" ? exports.target : field.default
+	}
+	if (!keyframe) {
+		keyframe = timeline.keyframes[timeline.frame] = { actions: [] }
+		document.getElementById("frame " + timeline.frame).classList.add("keyframe")
+		let actor = "id" in action ? action.id : 'target' in action ? action.target : null
+		if (actor !== null)
+			document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + timeline.frame).classList.add("keyframe")
+	}
+    keyframe.actions.push(action)
+
+    timeline.simulateFromFrame()
+    exports.update({target: {frame: timeline.frame, id: exports.target}})
+}
+
+function removeCommand(e) {
+	let action = e.target.parentNode.action
+	let keyframe = timeline.keyframes[timeline.frame]
+
+	keyframe.actions.splice(keyframe.actions.indexOf(action), 1)
+	let actor = "id" in action ? action.id : 'target' in action ? action.target : null
+	if (actor !== null) {
+		let hasKeyframe = false
+		for (let i = 0; i < keyframe.actions.length; i++) {
+			let action = keyframe.actions[i]
+			let compareActor = "id" in action ? action.id : 'target' in action ? action.target : null
+			if (actor == compareActor) {
+				hasKeyframe = true
+			}
+		}
+		if (!hasKeyframe) document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + timeline.frame).classList.remove("keyframe")
+	}
+	if (keyframe.actions.length === 0) {
+		delete timeline.keyframes[timeline.frame]
+		document.getElementById("frame " + timeline.frame).classList.remove("keyframe")
+	}
+	
+	timeline.simulateFromFrame()
+    exports.update({target: {frame: timeline.frame, id: exports.target}})
+}
 
 function addTitle(parent, action, i) {
 	let titleElement = document.createElement("h4")
@@ -233,11 +285,11 @@ function addTitle(parent, action, i) {
 	titleElement.addEventListener("click", foldAction)
 
 	let checkbox = document.createElement("input")
-	checkbox.id = "settings " + i
+	checkbox.id = "action settings " + i
 	checkbox.type = "checkbox"
 	checkbox.classList.add("dropdown")
 	let label = document.createElement("label")
-	label.setAttribute('for', "settings " + i)
+	label.setAttribute('for', "action settings " + i)
 	let button = document.createElement("button")
 	button.classList.add("dropdown-image")
 	button.title = "Action Settings"
@@ -271,34 +323,41 @@ function foldAction(e) {
 
 function editText(e) {
 	e.target.action[e.target.key] = e.target.value
-	controller.simulateFromFrame()
+	timeline.simulateFromFrame()
+	exports.update({target: {id: exports.target}})
 }
 
 function editNumber(e) {
 	e.target.action[e.target.key] = parseInt(e.target.value)
-	controller.simulateFromFrame()
+	timeline.simulateFromFrame()
+	exports.update({target: {id: exports.target}})
+}
+
+function editSlider(e) {
+	e.target.action[e.target.key] = parseInt(e.target.value)
+	timeline.simulateFromFrame()
 }
 
 function editCheck(e) {
 	e.target.action[e.target.key] = e.target.checked
-	controller.simulateFromFrame()
+	timeline.simulateFromFrame()
+	exports.update({target: {id: exports.target}})
 }
 
 function editEmote(e) {
 	e.target.action[e.target.key] = e.target.emotes.findIndex((emote) => emote.name === e.target.value)
-	controller.simulateFromFrame()
+	timeline.simulateFromFrame()
+	exports.update({target: {id: exports.target}})
 }
 
 function toggleActionPanel(e) {
-	if (!e || !checkParent(e.target, addActionPanel)) {
-		let classes = document.getElementById("addActionPanel").classList
-		if (!!e && checkParent(e.target, addActionButton)) {
-			if (classes.contains("collapsed")) {
-				classes.remove("collapsed")
-				document.getElementById("actionSearch").focus()
-			} else classes.add("collapsed")
+	let classes = document.getElementById("addActionPanel").classList
+	if (!!e && utility.checkParent(e.target, addActionButton)) {
+		if (classes.contains("collapsed")) {
+			classes.remove("collapsed")
+			document.getElementById("actionSearch").focus()
 		} else classes.add("collapsed")
-	}
+	} else classes.add("collapsed")
 }
 
 function toggleDropdowns(e) {
@@ -309,7 +368,7 @@ function toggleDropdowns(e) {
 			continue
 		}
 
-		if (!checkParent(e.target, dropdowns[i].checkbox)) {
+		if (!utility.checkParent(e.target, dropdowns[i].checkbox)) {
 			dropdowns[i].checkbox.checked = false
 			dropdowns[i].dropdown.classList.add("collapsed")
 		} else if (dropdowns[i].checkbox.checked) {
@@ -331,15 +390,6 @@ function updateDropdownPositions() {
 	}
 }
 
-// https://siongui.github.io/2015/02/13/hide-div-when-clicked-outside-it/
-function checkParent(t, elm) {
-  while(t.parentNode) {
-    if( t == elm ) {return true;}
-    t = t.parentNode;
-  }
-  return false;
-}
-
 function searchCommands(e) {
 	let actions = document.getElementById('actionsList')
     if (e.target.value === '') {
@@ -353,13 +403,4 @@ function searchCommands(e) {
             commands[i].style.display = 'block'
         }
 	}
-}
-
-function addCommand(e) {
-	controller.addCommand(e.target.command)
-	toggleActionPanel()
-}
-
-function removeCommand(e) {
-	controller.removeCommand(e.target.parentNode.action)
 }

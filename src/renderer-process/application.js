@@ -3,22 +3,21 @@
 // All of the Node.js APIs are available in this process.
 
 // Imports
+const project = require('./project')
+const controller = require('./controller')
+const timeline = require('./timeline')
+
 const electron = require('electron')
 const remote = electron.remote
 const modal = new (require('vanilla-modal').default)()
 const JSONEditor = require('jsoneditor')
-const status = require('./status.js')
-const controller = require('./controller.js')
-const path = require('path')
 const fs = require('fs-extra')
 
-let project
+//  Vars
 let editor
 let playing
 
 exports.init = function() {
-	project = electron.remote.getGlobal('project').project
-
 	// Window events
 	window.onkeydown = keyDown
 	//window.onkeyup = keyUp
@@ -422,8 +421,8 @@ function keyDown(e) {
 			clearInterval(playing)
 			playing = 0
 		} else playing = setInterval(playCutscene, 1000 / project.project.fps);
-	} else if (key == 37) controller.prevFrame()
-	else if (key == 39) controller.nextFrame()
+	} else if (key == 37) timeline.prevFrame()
+	else if (key == 39) timeline.nextFrame()
 	else handled = false
 
 	if (handled) e.preventDefault()
@@ -512,7 +511,7 @@ function toggleEditor() {
 }
 
 function playCutscene() {
-	if (controller.nextFrame()) {
+	if (timeline.nextFrame()) {
 		clearInterval(playing)
 		playing = 0
 	}

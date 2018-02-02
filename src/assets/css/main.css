@@ -620,7 +620,8 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 .actors-container {	
     display: inline-block;
     margin-right: -5px;
-    width: 100px;
+    margin-left: -10px;
+    width: 150px;
     height: 100%;
     vertical-align: top;
 }
@@ -633,25 +634,39 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
 
 .actors .actor {
 	background: #242a33;
-    height: 21px;
+    height: 20px;
     padding: 4px;
     width: calc(100% - 8px);
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: default;
+    border-top: solid 1px dimgrey;
+    border-left: solid 1px dimgrey;
+    position: relative;
 }
 
 .actors .actor:hover {
 	background: #333c4a;
 }
 
+.actor .dropdown + label {
+    width: 24px;
+    height: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+}
+
+.actor:hover .dropdown + label {
+	display: unset;
+}
+
 .horiz-scroll .actor:not(:first-child) {
 	margin-top: -1px;
 }
 
-.actors .actor:not(:first-child) {
-	border-top: solid 1px dimgrey;
-    height: 20px;
+.actors .actor:last-child {
+	border-bottom: solid 1px dimgrey;
 }
 
 .horiz-scroll {
@@ -659,7 +674,7 @@ div.jsoneditor-readonly, div.jsoneditor-value.jsoneditor-object, div.jsoneditor-
     overflow-x: scroll;
     overflow-y: hidden;
     min-height: 100%;
-    width: calc(100% - 101px);
+    width: calc(100% - 141px);
     display: inline-block;
     margin-bottom: -8px;
     border: 1px solid dimgrey;
@@ -845,13 +860,13 @@ input[type="search"]::-webkit-search-cancel-button {
   	cursor: pointer;
 }
 
-.footpanel div:not(.vert-scroll) {
+.footpanel div:not(.scroll) {
     padding: 4px;
     background: #242a33;
     border-bottom: solid 1px grey;
 }
 
-.footpanel div:not(.vert-scroll):hover {
+.footpanel div:not(.scroll):hover {
     background: #2a323d;
     cursor: pointer;
 }

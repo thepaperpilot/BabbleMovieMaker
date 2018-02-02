@@ -1,0 +1,6 @@
+{
+  "globals": {
+    "PIXI": false,
+    "stage": true
+  }
+}
