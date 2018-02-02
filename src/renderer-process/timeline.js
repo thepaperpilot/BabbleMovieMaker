@@ -62,9 +62,9 @@ exports.nextFrame = function() {
 
 exports.gotoFrame = function(frameIndex, update = true) {
 	let nearestKeyframe = exports.frame = frameIndex.target ? frameIndex.target.frame : frameIndex
-	while (!keyframes[nearestKeyframe])
+	while (!keyframes[nearestKeyframe] && nearestKeyframe > 0)
 		nearestKeyframe--
-	let puppets = JSON.parse(JSON.stringify(keyframes[nearestKeyframe].puppets))
+	let puppets = keyframes[nearestKeyframe] ? JSON.parse(JSON.stringify(keyframes[nearestKeyframe].puppets)) : []
 	for (let i = 0; i < stage.puppets.length; i++) {
 		let puppet = stage.puppets[i]
 		let remove = true
@@ -111,8 +111,10 @@ exports.simulateFromFrame = function() {
 		let keyframe = keyframes[keys[i]]
 
 		document.getElementById("frame " + currentFrame).classList.remove("warning")
-		for (let j = 0; j < actors.actors.length; j++)
-			document.getElementById("actor " + j + " frame " + currentFrame).classList.remove("warning")
+		for (let j = 0; j < actors.actors.length; j++) {
+			if (actors.actors[j] !== null)
+				document.getElementById("actor " + j + " frame " + currentFrame).classList.remove("warning")
+		}
 
 		for (let j = 0; j < keyframe.actions.length; j++) {
 			let action = keyframe.actions[j]
@@ -123,8 +125,7 @@ exports.simulateFromFrame = function() {
 				action.error = e.message
 				document.getElementById("frame " + currentFrame).classList.add("warning")
 				let actor = "id" in action ? action.id : 'target' in action ? action.target : null
-				if (actor !== null)
-					document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + currentFrame).classList.add("warning")
+				document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + currentFrame).classList.add("warning")
 			}
 		}
 
@@ -178,7 +179,7 @@ function updateTimeline(reset) {
 	currentFrame.classList.add("currentframe")
 
 	// Update inspector
-	inspector.update(reset || inspector.target === null ? null : {target: {id: inspector.target}})
+	inspector.update(reset ? -1 : null)
 
 	// Calculate where the current frame is on the timeline
 	let timeline = document.getElementById("time-scroll")

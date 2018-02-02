@@ -1,4 +1,5 @@
 // Imports
+const controller = require('./controller')
 const timeline = require('./timeline')
 const inspector = require('./inspector')
 const utility = require('./utility')
@@ -23,6 +24,7 @@ exports.addActor = function(i) {
 	domActor.id = "actor " + i
 	domActor.classList.add("actor")
 	domActor.innerText = exports.actors[i]
+	domActor.addEventListener("mouseleave", () => {toggleDropdowns()})
 	domActors.appendChild(domActor)
 
 	let checkbox = document.createElement("input")
@@ -58,9 +60,9 @@ exports.addActor = function(i) {
 	for (let j = 0; j < timeline.frames + timeline.bufferFrames; j++) {
 		let domFrame = document.createElement("div")
 		domFrame.id = "actor " + i + " frame " + j
-		domFrame.actor = exports.actors[i]
+		domFrame.actor = i
 		domFrame.frame = j
-		domFrame.addEventListener("click", inspector.update)
+		domFrame.addEventListener("click", selectActor)
 		domFrame.classList.add("frame")
 		if (j == timeline.frames)
 			domFrame.classList.add("lastFrame")
@@ -74,6 +76,11 @@ exports.addActor = function(i) {
 	}
 }
 
+function selectActor(e) {
+	timeline.gotoFrame(e.target.frame)
+	inspector.update(e.target.actor)
+}
+
 function newActor() {
 	let name = "actor"
 	let i = 1
@@ -85,7 +92,33 @@ function newActor() {
 }
 
 function removeActor(e) {
-	console.log(e.target.actor)
+	let actor = e.target.parentNode.actor
+	let id = exports.actors[actor]
+
+	controller.stage.removePuppet(id)
+	controller.stage.update(0)
+	exports.actors[actor] = null
+
+	if (inspector.target == actor) inspector.update(-1)
+	document.getElementById("actors").removeChild(document.getElementById("actor " + actor))
+	document.getElementById("time-scroll").removeChild(document.getElementById("timeline actor " + actor))
+
+	let keyframes = Object.keys(timeline.keyframes)
+	for (let i = 0; i < keyframes.length; i++) {
+		let keyframe = timeline.keyframes[keyframes[i]]
+		for (let j = 0; j < keyframe.actions.length; j++) {
+			if (keyframe.actions[j].target == id || keyframe.actions[j].id == id) {
+				keyframe.actions.splice(j, 1)
+				if (keyframe.actions.length === 0) {
+					delete timeline.keyframes[keyframes[i]]
+					document.getElementById("frame " + keyframes[i]).classList.remove("keyframe")
+				}
+				j--
+			}
+		}
+	}
+
+	timeline.simulateFromFrame()
 }
 
 function toggleDropdowns(e) {

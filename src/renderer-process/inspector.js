@@ -159,17 +159,17 @@ exports.init = function() {
 	document.getElementById("actionSearch").addEventListener("input", searchCommands)
 }
 
+// -1 is the frame, null is the current target, any other number is the index of the actor
 exports.update = function(actor) {
-	let newFrame = actor && 'frame' in actor.target ? actor.target.frame : null
-	let id = actor ? 'actor' in actor.target ? actor.target.actor : actor.target.id : null
+	actor = actor === null ? exports.target : actor
+	let id = actor !== null && actor > -1 ? actors.actors[actor] : null
 
-	if (newFrame !== null) timeline.gotoFrame(newFrame)
 	// if target is set XOR id is set
 	// this means we are transitioning from being on a frame to an actor, or vice versa
-	if ((exports.target === null) != (id === null)) {
+	if ((exports.target === null) != (actor === null)) {
 		let actions = document.getElementById("actionsList")
 		actions.innerHTML = ''
-		let needsId = (id !== null)
+		let needsId = (actor !== null)
 		let commands = Object.keys(project.project.commands)
 		for (let i = 0; i < commands.length; i++) {
 			let action = project.project.commands[commands[i]]
@@ -177,16 +177,16 @@ exports.update = function(actor) {
 				let actionElement = document.createElement("div")
 				actionElement.innerText = action.title
 				actionElement.command = commands[i]
-				actionElement.addEventListener("click", addCommand)
+				actionElement.addEventListener("click", addAction)
 				actions.appendChild(actionElement)
 			}
 		}
 	}
-	exports.target = id
+	exports.target = actor
 	let frame = timeline.frame
 	let frames = timeline.frames
 	let keyframe = timeline.keyframes[frame]
-	document.getElementById("inspectorTarget").innerText = id ? id : "Frame " + (frame + 1)
+	document.getElementById("inspectorTarget").innerText = id !== null ? id : "Frame " + (frame + 1)
 	document.getElementById("framecount").innerText = (frame + 1) + " / " + (frames + 1)
 
 	// Remove actor's currentFrame indicator, but not the frame's currentFrame indicator
@@ -195,7 +195,7 @@ exports.update = function(actor) {
 		node.classList.remove("currentframe")
 		node = document.body.getElementsByClassName("currentframe")[1]
 	}
-	if (id) document.getElementById("actor " + actors.actors.indexOf(id) + " frame " + frame).classList.add("currentframe")
+	if (id !== null) document.getElementById("actor " + actor + " frame " + frame).classList.add("currentframe")
 
 	let actions = document.getElementById("actions")
 	actions.innerHTML = ''
@@ -227,7 +227,33 @@ exports.update = function(actor) {
 		}
 }
 
-function addCommand(e) {
+exports.removeAction = function(e) {
+	let action = e.target ? e.target.parentNode.action : e
+	let keyframe = timeline.keyframes[timeline.frame]
+
+	keyframe.actions.splice(keyframe.actions.indexOf(action), 1)
+	let actor = "id" in action ? action.id : 'target' in action ? action.target : null
+	if (actor !== null) {
+		let hasKeyframe = false
+		for (let i = 0; i < keyframe.actions.length; i++) {
+			let action = keyframe.actions[i]
+			let compareActor = "id" in action ? action.id : 'target' in action ? action.target : null
+			if (actor == compareActor) {
+				hasKeyframe = true
+			}
+		}
+		if (!hasKeyframe && actors.actors.includes(actor)) document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + timeline.frame).classList.remove("keyframe")
+	}
+	if (keyframe.actions.length === 0) {
+		delete timeline.keyframes[timeline.frame]
+		document.getElementById("frame " + timeline.frame).classList.remove("keyframe")
+	}
+	
+	timeline.simulateFromFrame()
+    exports.update()
+}
+
+function addAction(e) {
 	let command = e.target.command
 	let keyframe = timeline.keyframes[timeline.frame]
 
@@ -249,33 +275,7 @@ function addCommand(e) {
     keyframe.actions.push(action)
 
     timeline.simulateFromFrame()
-    exports.update({target: {frame: timeline.frame, id: exports.target}})
-}
-
-function removeCommand(e) {
-	let action = e.target.parentNode.action
-	let keyframe = timeline.keyframes[timeline.frame]
-
-	keyframe.actions.splice(keyframe.actions.indexOf(action), 1)
-	let actor = "id" in action ? action.id : 'target' in action ? action.target : null
-	if (actor !== null) {
-		let hasKeyframe = false
-		for (let i = 0; i < keyframe.actions.length; i++) {
-			let action = keyframe.actions[i]
-			let compareActor = "id" in action ? action.id : 'target' in action ? action.target : null
-			if (actor == compareActor) {
-				hasKeyframe = true
-			}
-		}
-		if (!hasKeyframe) document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + timeline.frame).classList.remove("keyframe")
-	}
-	if (keyframe.actions.length === 0) {
-		delete timeline.keyframes[timeline.frame]
-		document.getElementById("frame " + timeline.frame).classList.remove("keyframe")
-	}
-	
-	timeline.simulateFromFrame()
-    exports.update({target: {frame: timeline.frame, id: exports.target}})
+    exports.update()
 }
 
 function addTitle(parent, action, i) {
@@ -302,7 +302,7 @@ function addTitle(parent, action, i) {
 	dropdown.action = action
 	let remove = document.createElement("li")
 	remove.innerText = "Remove Action"
-	remove.addEventListener("click", removeCommand)
+	remove.addEventListener("click", exports.removeAction)
 	dropdown.appendChild(remove)
 	dropdowns.push({checkbox, dropdown, button})
 	
@@ -324,13 +324,13 @@ function foldAction(e) {
 function editText(e) {
 	e.target.action[e.target.key] = e.target.value
 	timeline.simulateFromFrame()
-	exports.update({target: {id: exports.target}})
+	exports.update()
 }
 
 function editNumber(e) {
 	e.target.action[e.target.key] = parseInt(e.target.value)
 	timeline.simulateFromFrame()
-	exports.update({target: {id: exports.target}})
+	exports.update()
 }
 
 function editSlider(e) {
@@ -341,13 +341,13 @@ function editSlider(e) {
 function editCheck(e) {
 	e.target.action[e.target.key] = e.target.checked
 	timeline.simulateFromFrame()
-	exports.update({target: {id: exports.target}})
+	exports.update()
 }
 
 function editEmote(e) {
 	e.target.action[e.target.key] = e.target.emotes.findIndex((emote) => emote.name === e.target.value)
 	timeline.simulateFromFrame()
-	exports.update({target: {id: exports.target}})
+	exports.update()
 }
 
 function toggleActionPanel(e) {
