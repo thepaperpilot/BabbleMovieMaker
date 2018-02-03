@@ -1,6 +1,7 @@
 // Imports
 const controller = require('./controller')
 const status = require('./status')
+const timeline = require('./timeline')
 
 const remote = require('electron').remote
 const dialog = remote.dialog

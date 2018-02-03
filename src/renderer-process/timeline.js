@@ -140,11 +140,55 @@ exports.simulateFromFrame = function(frame) {
 		keyframe.puppets = puppets
 	}
 
+	project.scripts = exports.generateScript()
 	exports.gotoFrame(origFrame, false)
 }
 
 exports.resimulate = function() {
 	exports.simulateFromFrame(0)
+}
+
+exports.generateScript = function() {
+	if (!exports.keyframes) return null
+		console.log(project)
+
+	let keys = Object.keys(exports.keyframes)
+	let cutscene = []
+	let script = cutscene
+	for (let i = 0; i < keys.length; i++) {
+		if (i > 0) {
+			script.push({
+				command: "delay",
+				delay: (keys[i] - keys[i - 1]) * (1000 / project.project.fps),
+				wait: true
+			})
+		}
+		let keyframe = exports.keyframes[keys[i]]
+		let customActions = []
+		for (let j = 0; j < keyframe.actions.length; j++) {
+			let action = keyframe.actions[j]
+			delete action.error
+			// TODO add custom actions to array
+			// and continue
+			delete action.wait
+			script.push(action)
+		}
+		if (customActions.length > 0) {
+			let action = {
+				command: "run",
+				script: [],
+				wait: true
+			}
+			for (let j = 0; j < customActions.length; j++) {
+				customActions[j].wait = true
+				action.script.push(customActions[j])
+			}
+			script.push(action)
+			script = action.script
+		}
+	}
+	script[script.length - 1].wait = true
+	return cutscene
 }
 
 function updatePuppet(puppet) {
