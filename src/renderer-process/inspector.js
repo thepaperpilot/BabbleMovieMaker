@@ -250,7 +250,7 @@ exports.update = function(actor) {
 					actions.appendChild(actionElement)
 					actionElement.classList.add("action")
 					actionElement.classList.add("folded")
-					addTitle(actionElement, action, i)
+					addTitle(actionElement, action, i).frame =  keyframes[i]
 					let fields = Object.keys(command.fields)
 					for (let j = 0; j < fields.length; j++) {
 						let fieldGenerator = commandFields[command.fields[fields[j]].type]
@@ -316,7 +316,26 @@ exports.update = function(actor) {
 
 exports.removeAction = function(e) {
 	let action = e.target ? e.target.parentNode.action : e
-	let keyframe = timeline.keyframes[timeline.frame]
+	let frame = e.target && e.target.frame != null ? e.target.frame : timeline.frame // jshint ignore: line
+	let keyframe = timeline.keyframes[frame]
+
+	if (action.delay) {
+		let frameIndex = frame + Math.ceil(action.delay * project.project.fps / 1000)
+		let id = "frame " + frameIndex
+		if ('id' in action)
+			id = "actor " + actors.actors.indexOf(action.id) + " " + id
+		else if ('target' in action)
+			id = "actor " + actors.actors.indexOf(action.target) + " " + id
+		let frameElement = document.getElementById(id)
+
+		frameElement.finishedActions.splice(frameElement.finishedActions.indexOf(action), 1)
+
+		if (frameElement.finishedActions.length === 0) {
+			frameElement.classList.remove("endDelay")
+			timeline.delayEnds.splice(timeline.delayEnds.indexOf(frameIndex), 1)
+		}
+		action.delay = null
+	}
 
 	keyframe.actions.splice(keyframe.actions.indexOf(action), 1)
 	let actor = "id" in action ? action.id : 'target' in action ? action.target : null
@@ -398,6 +417,8 @@ function addTitle(parent, action, i) {
 	parent.appendChild(label)
 	// Get out of the action overflow, but stay in actionsList so we get removed automatically
 	parent.parentNode.appendChild(dropdown)
+
+	return titleElement
 }
 
 function foldAction(e) {

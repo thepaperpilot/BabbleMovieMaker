@@ -128,7 +128,7 @@ function readScript() {
 	stage.clearPuppets()
 	timeline.reset()
 	let frame = 0
-	let cutscene = new babble.Cutscene(stage, project.scripts, project.actors, () => { timeline.frames = frame + 1 })
+	let cutscene = new babble.Cutscene(stage, project.scripts, project.actors, () => { if (frame > timeline.frames) timeline.frames = frame })
 	cutscene.actions.delay = function(callback, action) {
 		// Normal delay behavior
         if (action.delay <= 0) requestAnimationFrame(callback)
@@ -140,6 +140,8 @@ function readScript() {
 
         // Find out when actions end
         if (action.parent) action.parent.delay = action.delay
+    	let endFrame = parseInt(frame) + Math.ceil(action.delay * project.project.fps / 1000)
+    	if (endFrame > timeline.frames) timeline.frames = endFrame
     }
 	actors.actors = []
 	cutscene.parseNextAction = function(script, callback) {
@@ -250,7 +252,10 @@ function readScript() {
 					id = "actor " + actors.actors.indexOf(action.target) + " " + id
 				let frameElement = document.getElementById(id)
 
-				if (!frameElement.finishedActions) frameElement.finishedActions = []
+				if (!frameElement.finishedActions) {
+					frameElement.finishedActions = []
+					timeline.delayEnds.push(frameIndex)
+				}
 				frameElement.finishedActions.push(action)
 
 				frameElement.classList.add("endDelay")

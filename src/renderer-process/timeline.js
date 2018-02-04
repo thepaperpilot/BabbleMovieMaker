@@ -13,11 +13,13 @@ const scrollPadding = 50	// When current frame loses visibility, how far it plac
 // Vars
 let psuedoCutscene
 let keyframes
+let currentFrame = null // used when resimulating
 
 exports.frame = null
 exports.frames = null
 exports.keyframes = null
 exports.bufferFrames = bufferFrames
+exports.delayEnds = []
 
 exports.init = function() {
 	// Set up psuedo cutscene, used for running actions without delays or parse other actions
@@ -25,6 +27,10 @@ exports.init = function() {
 	psuedoCutscene.parseNextAction = () => {}
 	psuedoCutscene.actions.delay = (callback, action) => {
 		if (action.parent) action.parent.delay = action.delay
+		if (currentFrame !== null) {
+			let endFrame = parseInt(currentFrame) + Math.ceil(action.delay * project.project.fps / 1000)
+	    	if (endFrame > exports.frames) exports.frames = endFrame
+		}
 	}
 }
 
@@ -98,18 +104,21 @@ exports.gotoFrame = function(frameIndex, update = true) {
 
 exports.simulateFromFrame = function(frame) {
 	let origFrame = frame == null ? exports.frame : frame // jshint ignore:line
-	let currentFrame = origFrame - 1
+	currentFrame = origFrame - 1
 	if (currentFrame === -1) stage.clearPuppets()
 	else exports.gotoFrame(currentFrame, false)
 
 	let keys = Object.keys(keyframes)
+	let oldFrames = exports.frames
+	exports.delayEnds.sort()
+	exports.frames = Math.max(keys[keys.length - 1], exports.delayEnds[exports.delayEnds.length - 1])
 	for (let i = 0; i < keys.length; i++) {
 		if (parseInt(keys[i]) < origFrame) continue
 
 		if (keys[i] == currentFrame) stage.update(0)
 		else for (let j = 0; j < keys[i] - currentFrame; j++)
 			stage.update(1000 / project.project.fps)
-		currentFrame = keys[i]
+		currentFrame = parseInt(keys[i])
 		let keyframe = keyframes[keys[i]]
 
 		document.getElementById("frame " + currentFrame).classList.remove("warning")
@@ -122,7 +131,7 @@ exports.simulateFromFrame = function(frame) {
 			let action = keyframe.actions[j]
 			action.error = null
 			if (action.delay) {
-				let frameIndex = parseInt(currentFrame) + Math.ceil(action.delay * project.project.fps / 1000)
+				let frameIndex = currentFrame + Math.ceil(action.delay * project.project.fps / 1000)
 				let id = "frame " + frameIndex
 				if ('id' in action)
 					id = "actor " + actors.actors.indexOf(action.id) + " " + id
@@ -134,6 +143,7 @@ exports.simulateFromFrame = function(frame) {
 
 				if (frameElement.finishedActions.length === 0) {
 					frameElement.classList.remove("endDelay")
+					exports.delayEnds.splice(exports.delayEnds.indexOf(currentFrame), 1)
 				}
 				action.delay = null
 			}
@@ -146,7 +156,7 @@ exports.simulateFromFrame = function(frame) {
 				document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + currentFrame).classList.add("warning")
 			}
 			if (action.delay) {
-				let frameIndex = parseInt(currentFrame) + Math.ceil(action.delay * project.project.fps / 1000)
+				let frameIndex = currentFrame + Math.ceil(action.delay * project.project.fps / 1000)
 				let id = "frame " + frameIndex
 				if ('id' in action)
 					id = "actor " + actors.actors.indexOf(action.id) + " " + id
@@ -154,7 +164,10 @@ exports.simulateFromFrame = function(frame) {
 					id = "actor " + actors.actors.indexOf(action.target) + " " + id
 				let frameElement = document.getElementById(id)
 
-				if (!frameElement.finishedActions) frameElement.finishedActions = []
+				if (!frameElement.finishedActions) {
+					frameElement.finishedActions = []
+					exports.delayEnds.push(frameIndex)
+				}
 				frameElement.finishedActions.push(action)
 
 				frameElement.classList.add("endDelay")
@@ -172,6 +185,59 @@ exports.simulateFromFrame = function(frame) {
 		keyframe.puppets = puppets
 	}
 
+	if (oldFrames < exports.frames) {
+		let node = document.body.getElementsByClassName("lastFrame")[0]
+		while (node) {
+			node.classList.remove("lastFrame")
+			node = document.body.getElementsByClassName("lastFrame")[0]
+		}
+		let domFrames = document.getElementById("frames")
+		for (let i = oldFrames + exports.bufferFrames; i < exports.frames + exports.bufferFrames; i++) {
+			let domFrame = document.createElement("div")
+			domFrame.id = "frame " + i
+			domFrame.classList.add("frame")
+			domFrame.frame = i
+			domFrame.addEventListener("click", exports.gotoFrame)
+			domFrames.appendChild(domFrame)
+			if (exports.keyframes[i])
+				domFrame.classList.add("keyframe")
+			if (i == exports.frames)
+				domFrame.classList.add("lastFrame")
+		}
+		for (let i = 0; i < actors.actors.length; i++) {
+			for (let j = oldFrames + exports.bufferFrames; j < exports.frames + exports.bufferFrames; j++) {
+				actors.addFrame(i, j)
+			}
+		}
+		if (oldFrames + exports.bufferFrames > exports.frames) {
+			document.getElementById("frame " + exports.frames).classList.add("lastFrame")
+			for (let i = 0; i < actors.actors.length; i++) {
+				document.getElementById("actor " + i + " frame " + exports.frames).classList.add("lastFrame")
+			}
+		}
+	} else if (oldFrames > exports.frames) {
+		let node = document.body.getElementsByClassName("lastFrame")[0]
+		while (node) {
+			node.classList.remove("lastFrame")
+			node = document.body.getElementsByClassName("lastFrame")[0]
+		}
+		let domFrames = document.getElementById("frames")
+		while (domFrames.children.length > exports.frames + exports.bufferFrames) {
+			let index = domFrames.children.length - 1
+			domFrames.removeChild(document.getElementById("frame " + index))
+			for (let i = 0; i < actors.actors.length; i++) 
+				document.getElementById("timeline actor " + i).removeChild(document.getElementById("actor " + i + " frame " + index))
+		}
+		document.getElementById("frame " + exports.frames).classList.add("lastFrame")
+		for (let i = 0; i < actors.actors.length; i++)
+			document.getElementById("actor " + i + " frame " + exports.frames).classList.add("lastFrame")
+		if (exports.frame > exports.frames) {
+			exports.gotoFrame(exports.frames)
+			origFrame = exports.frames
+		}
+	}
+
+	currentFrame = null
 	project.scripts = exports.generateScript()
 	exports.gotoFrame(origFrame, false)
 }

@@ -65,22 +65,26 @@ exports.addActor = function(i) {
 	domActor.classList.add("actor")
 	domTimeline.appendChild(domActor)
 	for (let j = 0; j < timeline.frames + timeline.bufferFrames; j++) {
-		let domFrame = document.createElement("div")
-		domFrame.id = "actor " + i + " frame " + j
-		domFrame.actor = i
-		domFrame.frame = j
-		domFrame.addEventListener("click", selectActor)
-		domFrame.classList.add("frame")
-		if (j == timeline.frames)
-			domFrame.classList.add("lastFrame")
-		domActor.appendChild(domFrame)
-		if (timeline.keyframes[j])
-			for (let k = 0; k < timeline.keyframes[j].actions.length; k++) {
-				if (timeline.keyframes[j].actions[k].target === exports.actors[i] || 
-					timeline.keyframes[j].actions[k].id === exports.actors[i])
-					domFrame.classList.add("keyframe")
-			}
+		exports.addFrame(i, j)
 	}
+}
+
+exports.addFrame = function(actor, frame) {
+	let domFrame = document.createElement("div")
+	domFrame.id = "actor " + actor + " frame " + frame
+	domFrame.actor = actor
+	domFrame.frame = frame
+	domFrame.addEventListener("click", selectActor)
+	domFrame.classList.add("frame")
+	if (frame == timeline.frames)
+		domFrame.classList.add("lastFrame")
+	document.getElementById("timeline actor " + actor).appendChild(domFrame)
+	if (timeline.keyframes[frame])
+		for (let i = 0; i < timeline.keyframes[frame].actions.length; i++) {
+			if (timeline.keyframes[frame].actions[i].target === exports.actors[actor] || 
+				timeline.keyframes[frame].actions[i].id === exports.actors[actor])
+				domFrame.classList.add("keyframe")
+		}
 }
 
 function selectActor(e) {
