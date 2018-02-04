@@ -12,7 +12,7 @@ const Gif = require('./../lib/gif.js')
 const fs = require('fs-extra')
 
 // Constants
-const puppetKeys = ["babbling", "id", "position", "target", "emote","facingLeft", "eyes", "mouths", "deadbonesStyle", "movingAnim", "eyesAnim", "mouthAnim", "deadbonesAnim", "eyesDuration", "mouthDuration", "deadbonesDuration", "deadbonesTargetY", "deadbonesStartY", "deadbonesTargetRotation", "deadbonesStartRotation", "eyeBabbleDuration", "mouthBabbleDuration", "name"]
+const puppetKeys = ["id", "name", "babbling", "position", "target", "emote", "facingLeft", "movingAnim", "eyesAnim", "mouthAnim", "deadbonesAnim", "eyesDuration", "mouthDuration", "deadbonesDuration", "deadbonesTargetY", "deadbonesStartY", "deadbonesTargetRotation", "deadbonesStartRotation"]
 
 // Vars
 let renderer

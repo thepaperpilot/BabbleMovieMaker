@@ -1,5 +1,6 @@
 //Imports
 const project = require('./project')
+let controller = require('./controller')
 const timeline = require('./timeline')
 const actors = require('./actors')
 const utility = require('./utility')
@@ -207,6 +208,32 @@ exports.update = function(actor) {
 	let actions = document.getElementById("actions")
 	actions.innerHTML = ''
 	dropdowns = []
+
+	// Add information about the actor's puppet
+	if (id !== null) {
+		let puppet = stage.getPuppet(id)
+		if (puppet) {
+			let info = {}
+			for (let i = 0; i < controller.puppetKeys.length; i++) {
+				info[controller.puppetKeys[i]] = puppet[controller.puppetKeys[i]]
+			}
+			let puppetInfo = document.createElement("div")
+			puppetInfo.classList.add("action")
+			puppetInfo.classList.add("folded")
+
+			let titleElement = document.createElement("h4")
+			titleElement.innerText = "Puppet Information"
+			titleElement.style.cursor = "pointer"
+			titleElement.addEventListener("click", foldAction)
+
+			let infoElement = document.createElement("pre")
+			infoElement.innerText = JSON.stringify(info, null, 4)
+			
+			puppetInfo.appendChild(titleElement)
+			puppetInfo.appendChild(infoElement)
+			actions.appendChild(puppetInfo)
+		}
+	}
 
 	// Find previous keyframes and add any actions that are ongoing up to this frame
 	let keyframes = Object.keys(timeline.keyframes)
