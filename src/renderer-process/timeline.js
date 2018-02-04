@@ -23,7 +23,9 @@ exports.init = function() {
 	// Set up psuedo cutscene, used for running actions without delays or parse other actions
 	psuedoCutscene = new babble.Cutscene(stage, null, project.actors)
 	psuedoCutscene.parseNextAction = () => {}
-	psuedoCutscene.actions.delay = () => {}
+	psuedoCutscene.actions.delay = (callback, action) => {
+		if (action.parent) action.parent.delay = action.delay
+	}
 }
 
 exports.reset = function() {
@@ -102,7 +104,7 @@ exports.simulateFromFrame = function(frame) {
 
 	let keys = Object.keys(keyframes)
 	for (let i = 0; i < keys.length; i++) {
-		if (keys[i] < origFrame) continue
+		if (parseInt(keys[i]) < origFrame) continue
 
 		if (keys[i] == currentFrame) stage.update(0)
 		else for (let j = 0; j < keys[i] - currentFrame; j++)
@@ -119,6 +121,22 @@ exports.simulateFromFrame = function(frame) {
 		for (let j = 0; j < keyframe.actions.length; j++) {
 			let action = keyframe.actions[j]
 			action.error = null
+			if (action.delay) {
+				let frameIndex = parseInt(currentFrame) + Math.ceil(action.delay * project.project.fps / 1000)
+				let id = "frame " + frameIndex
+				if ('id' in action)
+					id = "actor " + actors.actors.indexOf(action.id) + " " + id
+				else if ('target' in action)
+					id = "actor " + actors.actors.indexOf(action.target) + " " + id
+				let frameElement = document.getElementById(id)
+
+				frameElement.finishedActions.splice(frameElement.finishedActions.indexOf(action), 1)
+
+				if (frameElement.finishedActions.length === 0) {
+					frameElement.classList.remove("endDelay")
+				}
+				action.delay = null
+			}
 			try {
 				psuedoCutscene.actions[action.command].call(psuedoCutscene, () => {}, action)
 			} catch (e) {
@@ -126,6 +144,20 @@ exports.simulateFromFrame = function(frame) {
 				document.getElementById("frame " + currentFrame).classList.add("warning")
 				let actor = "id" in action ? action.id : 'target' in action ? action.target : null
 				document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + currentFrame).classList.add("warning")
+			}
+			if (action.delay) {
+				let frameIndex = parseInt(currentFrame) + Math.ceil(action.delay * project.project.fps / 1000)
+				let id = "frame " + frameIndex
+				if ('id' in action)
+					id = "actor " + actors.actors.indexOf(action.id) + " " + id
+				else if ('target' in action)
+					id = "actor " + actors.actors.indexOf(action.target) + " " + id
+				let frameElement = document.getElementById(id)
+
+				if (!frameElement.finishedActions) frameElement.finishedActions = []
+				frameElement.finishedActions.push(action)
+
+				frameElement.classList.add("endDelay")
 			}
 		}
 
@@ -150,7 +182,6 @@ exports.resimulate = function() {
 
 exports.generateScript = function() {
 	if (!exports.keyframes) return null
-		console.log(project)
 
 	let keys = Object.keys(exports.keyframes)
 	let cutscene = []
@@ -166,7 +197,7 @@ exports.generateScript = function() {
 		let keyframe = exports.keyframes[keys[i]]
 		let customActions = []
 		for (let j = 0; j < keyframe.actions.length; j++) {
-			let action = keyframe.actions[j]
+			let action = JSON.parse(JSON.stringify(keyframe.actions[j]))
 			delete action.error
 			// TODO add custom actions to array
 			// and continue

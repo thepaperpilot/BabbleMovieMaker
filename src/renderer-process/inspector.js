@@ -12,13 +12,14 @@ let addActionPanel
 let addActionButton
 
 var commandFields = {
-	text: function(parent, field, action, key) {
+	text: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
 		
 		let textbox = document.createElement("input")
 		textbox.style.display = 'block'
 		textbox.type = "text"
+		textbox.frame = frame
 		textbox.action = action
 		textbox.key = key
 		textbox.value = action[key]
@@ -27,13 +28,14 @@ var commandFields = {
 		parent.appendChild(titleElement)
 		parent.appendChild(textbox)
 	},
-	number: function(parent, field, action, key) {
+	number: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
 		
 		let numberbox = document.createElement("input")
 		numberbox.style.display = 'block'
 		numberbox.type = "number"
+		numberbox.frame = frame
 		numberbox.action = action
 		numberbox.key = key
 		numberbox.value = action[key]
@@ -42,7 +44,7 @@ var commandFields = {
 		parent.appendChild(titleElement)
 		parent.appendChild(numberbox)
 	},
-	slider: function(parent, field, action, key) {
+	slider: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
 		
@@ -58,12 +60,14 @@ var commandFields = {
 		slider.style.display = 'block'
 		slider.style.flex = "1 1 auto"
 		slider.type = "range"
+		slider.frame = frame
 		slider.action = action
 		slider.key = key
 		slider.min = field.min
 		slider.max = field.max === "numCharacters" ? project.project.numCharacters + 1 : field.max
 		slider.value = action[key]
 		slider.addEventListener("input", editSlider)
+		slider.addEventListener("change", () => {exports.update()})
 
 		let maxElement = document.createElement("span")
 		maxElement.style.flex = "0 1 auto"
@@ -77,11 +81,12 @@ var commandFields = {
 		parent.appendChild(titleElement)
 		parent.appendChild(box)
 	},
-	checkbox: function(parent, field, action, key, index) {
+	checkbox: function(parent, field, frame, action, key, index) {
 		let checkbox = document.createElement("input")
 		checkbox.id = action.command + " " + key + " " + index
 		checkbox.type = "checkbox"
 		checkbox.classList.add("checkbox")
+		checkbox.frame = frame
 		checkbox.action = action
 		checkbox.key = key
 		checkbox.checked = action[key]
@@ -95,11 +100,12 @@ var commandFields = {
 		parent.appendChild(checkbox)
 		parent.appendChild(label)
 	},
-	select: function(parent, field, action, key) {
+	select: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
 
 		let select = document.createElement("select")
+		select.frame = frame
 		select.action = action
 		select.key = key
 		select.addEventListener("change", editText)
@@ -115,11 +121,12 @@ var commandFields = {
 		parent.appendChild(titleElement)
 		parent.appendChild(select)
 	},
-	emote: function(parent, field, action, key) {
+	emote: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
 
 		let select = document.createElement("select")
+		select.frame = frame
 		select.action = action
 		select.key = key
 		select.addEventListener("change", editEmote)
@@ -161,7 +168,7 @@ exports.init = function() {
 
 // -1 is the frame, null is the current target, any other number is the index of the actor
 exports.update = function(actor) {
-	actor = actor === null ? exports.target : actor
+	actor = actor == null ? exports.target : actor // jshint ignore: line
 	let id = actor !== null && actor > -1 ? actors.actors[actor] : null
 
 	// if target is set XOR id is set
@@ -201,6 +208,51 @@ exports.update = function(actor) {
 	actions.innerHTML = ''
 	dropdowns = []
 
+	// Find previous keyframes and add any actions that are ongoing up to this frame
+	let keyframes = Object.keys(timeline.keyframes)
+	for (let i = 0; i < keyframes.length; i++) {
+		if (keyframes[i] >= frame) break
+		for (let j = 0; j < timeline.keyframes[keyframes[i]].actions.length; j++) {
+			let action = timeline.keyframes[keyframes[i]].actions[j]
+			if (id === null && (action.id || action.target) || id !== null && !(action.id === id || action.target === id)) continue
+			if (action.delay) {
+				let endFrame = parseInt(keyframes[i]) + Math.ceil(action.delay * project.project.fps / 1000)
+				if (endFrame >= frame) {
+					let command  = project.project.commands[action.command]
+					let actionElement = document.createElement("div")
+					actions.appendChild(actionElement)
+					actionElement.classList.add("action")
+					actionElement.classList.add("folded")
+					addTitle(actionElement, action, i)
+					let fields = Object.keys(command.fields)
+					for (let j = 0; j < fields.length; j++) {
+						let fieldGenerator = commandFields[command.fields[fields[j]].type]
+						if (fieldGenerator) 
+							fieldGenerator(actionElement, command.fields[fields[j]], keyframes[i], action, fields[j], i)
+					}
+					if (action.error) {
+						let error = document.createElement("div")
+						error.classList.add("error")
+						error.innerText = action.error
+						actionElement.appendChild(error)
+					}
+					let indicator = document.createElement("div")
+					if (endFrame > frame) {
+						indicator.classList.add("inprogress")
+						indicator.title = "Action is in progress"
+						indicator.dataset.start = parseInt(keyframes[i]) + 1
+						indicator.dataset.end = endFrame + 1
+					} else {
+						indicator.classList.add("complete")
+						indicator.title = "Action completes on this frame"
+						indicator.dataset.start = parseInt(keyframes[i]) + 1
+					}
+					actionElement.appendChild(indicator)
+				}
+			}
+		}
+	}
+
 	if (keyframe)
 		for (let i = 0; i < keyframe.actions.length; i++) {
 			let action = keyframe.actions[i]
@@ -215,13 +267,21 @@ exports.update = function(actor) {
 				for (let j = 0; j < fields.length; j++) {
 					let fieldGenerator = commandFields[command.fields[fields[j]].type]
 					if (fieldGenerator) 
-						fieldGenerator(actionElement, command.fields[fields[j]], action, fields[j], i)
+						fieldGenerator(actionElement, command.fields[fields[j]], frame, action, fields[j], i)
 				}
 				if (action.error) {
 					let error = document.createElement("div")
 					error.classList.add("error")
 					error.innerText = action.error
 					actionElement.appendChild(error)
+				}
+				if (action.delay) {
+					let endFrame = parseInt(frame) + Math.ceil(action.delay * project.project.fps / 1000)
+					let indicator = document.createElement("div")
+					indicator.classList.add("start")
+					indicator.title = "Action continues after this frame"
+					indicator.dataset.end = endFrame + 1
+					actionElement.appendChild(indicator)
 				}
 			}
 		}
@@ -263,7 +323,7 @@ function addAction(e) {
 	let fields = Object.keys(project.project.commands[command].fields)
 	for (let i = 0; i < fields.length; i++) {
 		let field = project.project.commands[command].fields[fields[i]]
-		action[fields[i]] = fields[i] === "id" || fields[i] === "target" ? exports.target : field.default
+		action[fields[i]] = fields[i] === "id" || fields[i] === "target" ? actors.actors[exports.target] : field.default
 	}
 	if (!keyframe) {
 		keyframe = timeline.keyframes[timeline.frame] = { actions: [] }
@@ -322,31 +382,46 @@ function foldAction(e) {
 }
 
 function editText(e) {
+	let frame = timeline.frame
 	e.target.action[e.target.key] = e.target.value
-	timeline.simulateFromFrame()
+	timeline.simulateFromFrame(e.target.frame)
+	if (e.target.frame !== frame)
+		timeline.gotoFrame(frame, false)
 	exports.update()
 }
 
 function editNumber(e) {
+	let frame = timeline.frame
 	e.target.action[e.target.key] = parseInt(e.target.value)
-	timeline.simulateFromFrame()
+	timeline.simulateFromFrame(e.target.frame)
+	if (e.target.frame !== frame)
+		timeline.gotoFrame(frame, false)
 	exports.update()
 }
 
 function editSlider(e) {
+	let frame = timeline.frame
 	e.target.action[e.target.key] = parseInt(e.target.value)
-	timeline.simulateFromFrame()
+	timeline.simulateFromFrame(e.target.frame)
+	if (e.target.frame !== frame)
+		timeline.gotoFrame(frame, false)
 }
 
 function editCheck(e) {
+	let frame = timeline.frame
 	e.target.action[e.target.key] = e.target.checked
-	timeline.simulateFromFrame()
+	timeline.simulateFromFrame(e.target.frame)
+	if (e.target.frame !== frame)
+		timeline.gotoFrame(frame, false)
 	exports.update()
 }
 
 function editEmote(e) {
+	let frame = timeline.frame
 	e.target.action[e.target.key] = e.target.emotes.findIndex((emote) => emote.name === e.target.value)
-	timeline.simulateFromFrame()
+	timeline.simulateFromFrame(e.target.frame)
+	if (e.target.frame !== frame)
+		timeline.gotoFrame(frame, false)
 	exports.update()
 }
 

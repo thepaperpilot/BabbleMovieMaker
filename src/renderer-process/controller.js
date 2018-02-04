@@ -128,7 +128,19 @@ function readScript() {
 	stage.clearPuppets()
 	timeline.reset()
 	let frame = 0
-	let cutscene = new babble.Cutscene(stage, project.scripts, project.actors, () => { timeline.frames = frame })
+	let cutscene = new babble.Cutscene(stage, project.scripts, project.actors, () => { timeline.frames = frame + 1 })
+	cutscene.actions.delay = function(callback, action) {
+		// Normal delay behavior
+        if (action.delay <= 0) requestAnimationFrame(callback)
+        else {
+            let timer = PIXI.timerManager.createTimer(action.delay)
+            timer.on('end', callback)
+            timer.start()
+        }
+
+        // Find out when actions end
+        if (action.parent) action.parent.delay = action.delay
+    }
 	actors.actors = []
 	cutscene.parseNextAction = function(script, callback) {
         // Check if script is complete
@@ -222,6 +234,28 @@ function readScript() {
 
 	for (let i = 0; i < actors.actors.length; i++) {
 		actors.addActor(i)
+	}
+
+	let keyframes = Object.keys(timeline.keyframes)
+	for (let i = 0; i < keyframes.length; i++) {
+		let keyframe = timeline.keyframes[keyframes[i]]
+		for (let j = 0; j < keyframe.actions.length; j++) {
+			let action = keyframe.actions[j]
+			if (action.delay) {
+				let frameIndex = parseInt(keyframes[i]) + Math.ceil(action.delay * project.project.fps / 1000)
+				let id = "frame " + frameIndex
+				if ('id' in action)
+					id = "actor " + actors.actors.indexOf(action.id) + " " + id
+				else if ('target' in action)
+					id = "actor " + actors.actors.indexOf(action.target) + " " + id
+				let frameElement = document.getElementById(id)
+
+				if (!frameElement.finishedActions) frameElement.finishedActions = []
+				frameElement.finishedActions.push(action)
+
+				frameElement.classList.add("endDelay")
+			}
+		}
 	}
 
 	timeline.gotoFrame(0)

@@ -1,5 +1,5 @@
 // Imports
-const controller = require('./controller')
+const project = require('./project')
 const timeline = require('./timeline')
 const inspector = require('./inspector')
 const utility = require('./utility')
@@ -143,6 +143,23 @@ function removeActor(e) {
 		let keyframe = timeline.keyframes[keyframes[i]]
 		for (let j = 0; j < keyframe.actions.length; j++) {
 			if (keyframe.actions[j].target == id || keyframe.actions[j].id == id) {
+				let action = keyframe.actions[j]
+				if (action.delay) {
+					let frameIndex = parseInt(keyframes[i]) + Math.ceil(action.delay * project.project.fps / 1000)
+					let id = "frame " + frameIndex
+					if ('id' in action)
+						id = "actor " + exports.actors.indexOf(action.id) + " " + id
+					else if ('target' in action)
+						id = "actor " + exports.actors.indexOf(action.target) + " " + id
+					let frameElement = document.getElementById(id)
+
+					frameElement.finishedActions.splice(frameElement.finishedActions.indexOf(action), 1)
+
+					if (frameElement.finishedActions.length === 0) {
+						frameElement.classList.remove("endDelay")
+					}
+					action.delay = null
+				}
 				keyframe.actions.splice(j, 1)
 				if (keyframe.actions.length === 0) {
 					delete timeline.keyframes[keyframes[i]]
