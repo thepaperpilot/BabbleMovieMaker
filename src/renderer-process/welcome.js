@@ -16,7 +16,7 @@ document.getElementById('open').addEventListener('click', function() {
 	util.selectProject()
 })
 document.getElementById('browse').addEventListener('click', function() {
-	 util.selectDirectory(function (filepaths) {
+	 util.selectBabble(function (filepaths) {
 		if (filepaths)
 			document.getElementById('location').value = filepaths[0];
 	})
@@ -26,26 +26,25 @@ document.getElementById('create').addEventListener('submit', function(e) {
 	e.preventDefault()
 
 	// Find paths
-	let src = path.join(path.dirname(require.main.filename), 'empty-project')
-	let location = document.getElementById('location').value
-	let name = document.getElementById('name').value
-	let dest = path.join(location, name)
+	let babble = document.getElementById('location').value
 
 	// Check folder is empty, otherwise stop and alert user
-	fs.ensureDirSync(dest, err => {
+	fs.ensureFileSync(babble, err => {
   		console.log(err)
 	})
-	if (fs.readdirSync(dest).length > 0) {
-		dialog.showErrorBox("Folder exists and isn't empty", "You must choose a location and project name such that there either isn't a folder there or it is empty.")
+	let dest = babble.substr(0, babble.lastIndexOf('.')) + ".babblemm"
+	if (fs.existsSync(dest)) {
+		dialog.showErrorBox("Could not create project", "There's already a Babble Movie Maker project associated with that Babble Buds project.")
 		return false
 	}
 
-	// Copy sample project to project being created
-	fs.copySync(src, dest)
-	fs.moveSync(path.join(dest, 'empty-project.babblemm'), path.join(dest, name + '.babblemm'))
+	// Create project
+	fs.writeJsonSync(dest, {
+		babble: babble
+	})
 
 	// Open new project
-	remote.require('./main').setFilepath(path.join(dest, name + '.babblemm'))
+	remote.require('./main').setFilepath(dest)
 	remote.require('./main').redirect('application.html')
 })
 let recentProjectsElement = document.getElementById('recent-projects')

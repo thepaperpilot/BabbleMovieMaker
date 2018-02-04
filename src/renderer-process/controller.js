@@ -128,7 +128,7 @@ function readScript() {
 	stage.clearPuppets()
 	timeline.reset()
 	let frame = 0
-	let cutscene = new babble.Cutscene(stage, project.scripts, project.actors, () => { if (frame > timeline.frames) timeline.frames = frame })
+	let cutscene = new babble.Cutscene(stage, project.scripts, project.puppets, () => { if (timeline.frames === null || frame > timeline.frames) timeline.frames = frame })
 	cutscene.actions.delay = function(callback, action) {
 		// Normal delay behavior
         if (action.delay <= 0) requestAnimationFrame(callback)
@@ -141,7 +141,7 @@ function readScript() {
         // Find out when actions end
         if (action.parent) action.parent.delay = action.delay
     	let endFrame = parseInt(frame) + Math.ceil(action.delay * project.project.fps / 1000)
-    	if (endFrame > timeline.frames) timeline.frames = endFrame
+    	if (timeline.frames === null || endFrame > timeline.frames) timeline.frames = endFrame
     }
 	actors.actors = []
 	cutscene.parseNextAction = function(script, callback) {
@@ -183,9 +183,6 @@ function readScript() {
 				this.actions[action.command].call(this, newCallback, action)
 			} catch (e) {
 				action.error = e.message
-				document.getElementById("frame " + frame).classList.add("warning")				
-				if (actor !== null)
-					document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + frame).classList.add("warning")
 				newCallback()
 			}
         } else {
@@ -194,15 +191,12 @@ function readScript() {
 				this.actions[action.command].call(this, this.empty, action)
 			} catch (e) {
 				action.error = e.message
-				document.getElementById("frame " + frame).classList.add("warning")				
-				if (actor !== null)
-					document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + frame).classList.add("warning")
 			}
             this.parseNextAction(script.slice(1), callback)
         }
     }
 	cutscene.start()
-	while (!timeline.frames || frame < timeline.frames + timeline.bufferFrames) {
+	while (timeline.frames === null || frame < timeline.frames + timeline.bufferFrames) {
 		if (timeline.keyframes[frame]) {
 			let puppets = []
 			for (let i = 0; i < stage.puppets.length; i++) {
@@ -260,9 +254,16 @@ function readScript() {
 
 				frameElement.classList.add("endDelay")
 			}
+			if (action.error) {
+				let actor = "id" in action ? action.id : 'target' in action ? action.target : null
+				document.getElementById("frame " + keyframes[i]).classList.add("warning")				
+				if (actor !== null)
+					document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + keyframes[i]).classList.add("warning")
+			}
 		}
 	}
 
+	project.updateBabble(false)
 	timeline.gotoFrame(0)
 }
 

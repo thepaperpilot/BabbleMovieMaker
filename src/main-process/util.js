@@ -14,12 +14,26 @@ exports.selectDirectory = function(callback) {
 		}, callback)
 }
 
+exports.selectBabble = function(callback) {
+  dialog.showOpenDialog(BrowserWindow.getFocusedWindow(), {
+        title: 'Select Babble Buds Project',
+        defaultPath: path.join(app.getPath('home'), 'projects'),
+        filters: [
+          {name: 'Babble Buds Project File', extensions: ['babble']},
+          {name: 'All Files', extensions: ['*']}
+        ],
+        properties: [
+          'openFile'
+        ] 
+      }, callback)
+}
+
 exports.selectProject = function() {
-	dialog.showOpenDialog(BrowserWindow.getFocusedWindow(), {
+  dialog.showOpenDialog(BrowserWindow.getFocusedWindow(), {
         title: 'Open Project',
         defaultPath: path.join(app.getPath('home'), 'projects'),
         filters: [
-          {name: 'Babble Buds Movie Maker Project File', extensions: ['babblemm']},
+          {name: 'Babble Movie Maker Project File', extensions: ['babblemm']},
           {name: 'All Files', extensions: ['*']}
         ],
         properties: [

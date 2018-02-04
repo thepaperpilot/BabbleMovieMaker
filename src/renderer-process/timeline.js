@@ -23,7 +23,7 @@ exports.delayEnds = []
 
 exports.init = function() {
 	// Set up psuedo cutscene, used for running actions without delays or parse other actions
-	psuedoCutscene = new babble.Cutscene(stage, null, project.actors)
+	psuedoCutscene = new babble.Cutscene(stage, null, project.puppets)
 	psuedoCutscene.parseNextAction = () => {}
 	psuedoCutscene.actions.delay = (callback, action) => {
 		if (action.parent) action.parent.delay = action.delay
@@ -36,7 +36,7 @@ exports.init = function() {
 
 exports.reset = function() {
 	keyframes = exports.keyframes = {}
-	exports.frames = exports.frame = 0
+	exports.frames = exports.frame = null
 }
 
 exports.prevFrame = function() {
@@ -79,7 +79,7 @@ exports.gotoFrame = function(frameIndex, update = true) {
 		for (let j = 0; j < puppets.length; j++) {
 			if (puppet.id === puppets[j].id) {
 				if (puppet.name !== puppets[j].name)
-					puppet = stage.setPuppet(puppet.id, stage.createPuppet(project.actors[puppets[j].name]))
+					puppet = stage.setPuppet(puppet.id, stage.createPuppet(project.puppets[puppets[j].name]))
 				Object.assign(puppet, puppets[j])
 				updatePuppet(puppet)
 				remove = false
@@ -90,7 +90,7 @@ exports.gotoFrame = function(frameIndex, update = true) {
 	}
 
 	for (let i = 0; i < puppets.length; i++) {
-		let puppet = stage.addPuppet(project.actors[puppets[i].name], puppets[i].id)
+		let puppet = stage.addPuppet(project.puppets[puppets[i].name], puppets[i].id)
 		Object.assign(puppet, puppets[i])
 		updatePuppet(puppet)
 	}
@@ -111,7 +111,13 @@ exports.simulateFromFrame = function(frame) {
 	let keys = Object.keys(keyframes)
 	let oldFrames = exports.frames
 	exports.delayEnds.sort()
-	exports.frames = Math.max(keys[keys.length - 1], exports.delayEnds[exports.delayEnds.length - 1])
+	if (keys.length > 0) {
+		if (exports.delayEnds.length > 0) {
+			exports.frames = Math.max(keys[keys.length - 1], exports.delayEnds[exports.delayEnds.length - 1])
+		} else {
+			exports.frames = parseInt(keys[keys.length - 1])
+		}
+	} else exports.frames = 0
 	for (let i = 0; i < keys.length; i++) {
 		if (parseInt(keys[i]) < origFrame) continue
 
@@ -244,6 +250,7 @@ exports.simulateFromFrame = function(frame) {
 
 exports.resimulate = function() {
 	exports.simulateFromFrame(0)
+	inspector.update()
 }
 
 exports.generateScript = function() {
@@ -265,6 +272,7 @@ exports.generateScript = function() {
 		for (let j = 0; j < keyframe.actions.length; j++) {
 			let action = JSON.parse(JSON.stringify(keyframe.actions[j]))
 			delete action.error
+			delete action.delay
 			// TODO add custom actions to array
 			// and continue
 			delete action.wait
@@ -284,7 +292,7 @@ exports.generateScript = function() {
 			script = action.script
 		}
 	}
-	script[script.length - 1].wait = true
+	if(script.length > 0) script[script.length - 1].wait = true
 	return cutscene
 }
 

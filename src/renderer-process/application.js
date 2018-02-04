@@ -20,6 +20,9 @@ exports.init = function() {
 	window.onbeforeunload = beforeUnload
 	window.addEventListener("resize", controller.resize)
 
+	// Electron window events
+	electron.remote.getCurrentWindow().on('focus', () => { project.updateBabble() })
+
 	// DOM listeners
 	document.getElementById('greenscreen').addEventListener('click', controller.toggleGreenscreen)
 	document.getElementById('settings').addEventListener('click', toggleSettings)

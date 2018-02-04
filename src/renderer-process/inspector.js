@@ -29,6 +29,22 @@ var commandFields = {
 		parent.appendChild(titleElement)
 		parent.appendChild(textbox)
 	},
+	puppet: function(parent, field, frame, action, key) {
+		let titleElement = document.createElement("p")
+		titleElement.innerText = field.title
+		
+		let textbox = document.createElement("input")
+		textbox.style.display = 'block'
+		textbox.type = "text"
+		textbox.frame = frame
+		textbox.action = action
+		textbox.key = key
+		textbox.value = action[key]
+		textbox.addEventListener("change", editText)
+		
+		parent.appendChild(titleElement)
+		parent.appendChild(textbox)
+	},
 	number: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
@@ -133,10 +149,10 @@ var commandFields = {
 		select.addEventListener("change", editEmote)
 
 		// populate 
-		let puppet = action.name ? project.actors[action.name] : 
+		let puppet = action.name ? project.puppets[action.name] : 
 			stage.getPuppet(action.target) ? 
 			stage.getPuppet(action.target).container.puppet : null
-		if (puppet !== null) {
+		if (puppet != null) { // jshint ignore: line
 			let emotes = Object.keys(puppet.emotes)
 			for (let i = 0; i < emotes.length; i++) {
 				let emote = puppet.emotes[emotes[i]]

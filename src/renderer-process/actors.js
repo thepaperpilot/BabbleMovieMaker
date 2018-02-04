@@ -126,7 +126,7 @@ function renameActor(e) {
 		if (puppet) puppet.id = puppet.container.id = e.target.value
 		
 		exports.actors[e.target.actor] = e.target.value
-		timeline.simulateFromFrame()
+		timeline.resimulate()
 	}
 }
 
