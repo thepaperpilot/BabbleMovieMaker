@@ -13,6 +13,20 @@ const modal = new (require('vanilla-modal').default)()
 //  Vars
 let playing
 
+// DOM Elements
+let greenscreenCheckbox = document.getElementById("greenscreen")
+let settingsButton = document.getElementById("settings")
+let puppetsButton = document.getElementById("puppets")
+let exportButton = document.getElementById("export")
+let colorpicker = document.getElementById("colorpicker")
+let fps = document.getElementById("fps")
+let puppetscale = document.getElementById("puppetscale")
+let numslots = document.getElementById("numslots")
+let resolution = document.getElementById("resolutions")
+let timelinePanel = document.getElementById("timeline")
+let settingsPanel = document.getElementById("settings-panel")
+let puppetsPanel = document.getElementById("puppets-panel")
+
 exports.init = function() {
 	// Window events
 	window.onkeydown = keyDown
@@ -24,14 +38,15 @@ exports.init = function() {
 	electron.remote.getCurrentWindow().on('focus', () => { project.updateBabble() })
 
 	// DOM listeners
-	document.getElementById('greenscreen').addEventListener('click', controller.toggleGreenscreen)
-	document.getElementById('settings').addEventListener('click', toggleSettings)
-	document.getElementById('export').addEventListener('click', controller.export)
-	document.getElementById('colorpicker').addEventListener('change', colorpickerChange)
-	document.getElementById('fps').addEventListener('change', fpsChange)
-	document.getElementById('puppetscale').addEventListener('change', puppetscaleChange)
-	document.getElementById('numslots').addEventListener('change', numslotsChange)
-	document.getElementById('resolutions').addEventListener('change', resolutionChange)
+	greenscreenCheckbox.addEventListener('click', controller.toggleGreenscreen)
+	settingsButton.addEventListener('click', toggleSettings)
+	puppetsButton.addEventListener('click', togglePuppets)
+	exportButton.addEventListener('click', controller.export)
+	colorpicker.addEventListener('change', colorpickerChange)
+	fps.addEventListener('change', fpsChange)
+	puppetscale.addEventListener('change', puppetscaleChange)
+	numslots.addEventListener('change', numslotsChange)
+	resolution.addEventListener('change', resolutionChange)
 
 	// Handle input events from popout
 	electron.ipcRenderer.on('save', () => {
@@ -48,11 +63,11 @@ exports.init = function() {
 	})
 
 	// Load settings values
-	document.getElementById('colorpicker').value = project.project.greenScreen
-	document.getElementById('fps').value = project.project.fps
-	document.getElementById('puppetscale').value = project.project.puppetScale
-	document.getElementById('numslots').value = project.project.numCharacters
-	document.getElementById('resolutions').value = project.project.resolution
+	colorpicker.value = project.project.greenScreen
+	fps.value = project.project.fps
+	puppetscale.value = project.project.puppetScale
+	numslots.value = project.project.numCharacters
+	resolution.value = project.project.resolution
 }
 
 function keyDown(e) {
@@ -80,16 +95,34 @@ function beforeUnload() {
 }
 
 function toggleSettings() {
-	if (document.getElementById('settings-panel').style.display == 'none') {
-		document.getElementById('settings-panel').style.display = 'block'
-		document.getElementById('timeline').style.display = 'none'
+	if (settingsPanel.style.display == 'none') {
+		settingsPanel.style.display = 'block'
+		puppetsPanel.style.display = 'none'
+		timelinePanel.style.display = 'none'
 
-		document.getElementById('settings').classList.add('open-tab')
+		settingsButton.classList.add('open-tab')
+		puppetsButton.classList.remove('open-tab')
 	} else {
-		document.getElementById('settings-panel').style.display = 'none'
-		document.getElementById('timeline').style.display = 'block'
+		settingsPanel.style.display = 'none'
+		timelinePanel.style.display = 'block'
 
-		document.getElementById('settings').classList.remove('open-tab')
+		settingsButton.classList.remove('open-tab')
+	}
+}
+
+function togglePuppets() {
+	if (puppetsPanel.style.display == 'none') {
+		settingsPanel.style.display = 'none'
+		puppetsPanel.style.display = 'block'
+		timelinePanel.style.display = 'none'
+
+		settingsButton.classList.remove('open-tab')
+		puppetsButton.classList.add('open-tab')
+	} else {
+		puppetsPanel.style.display = 'none'
+		timelinePanel.style.display = 'block'
+
+		puppetsButton.classList.remove('open-tab')
 	}
 }
 

@@ -15,6 +15,10 @@ let psuedoCutscene
 let keyframes
 let currentFrame = null // used when resimulating
 
+// DOM Elements
+let timescroll = document.getElementById("time-scroll")
+let domFrames = document.getElementById("frames")
+
 exports.frame = null
 exports.frames = null
 exports.keyframes = null
@@ -197,7 +201,6 @@ exports.simulateFromFrame = function(frame) {
 			node.classList.remove("lastFrame")
 			node = document.body.getElementsByClassName("lastFrame")[0]
 		}
-		let domFrames = document.getElementById("frames")
 		for (let i = oldFrames + exports.bufferFrames; i < exports.frames + exports.bufferFrames; i++) {
 			let domFrame = document.createElement("div")
 			domFrame.id = "frame " + i
@@ -227,7 +230,6 @@ exports.simulateFromFrame = function(frame) {
 			node.classList.remove("lastFrame")
 			node = document.body.getElementsByClassName("lastFrame")[0]
 		}
-		let domFrames = document.getElementById("frames")
 		while (domFrames.children.length > exports.frames + exports.bufferFrames) {
 			let index = domFrames.children.length - 1
 			domFrames.removeChild(document.getElementById("frame " + index))
@@ -335,17 +337,16 @@ function updateTimeline(reset) {
 	inspector.update(reset ? -1 : null)
 
 	// Calculate where the current frame is on the timeline
-	let timeline = document.getElementById("time-scroll")
-	let timelineRect = timeline.getBoundingClientRect()
+	let timelineRect = timescroll.getBoundingClientRect()
     let rect = currentFrame.getBoundingClientRect()
     let width = timelineRect.right - timelineRect.left - scrollPadding
 
     // Scroll timeline to currentFrame if necessary
     if (rect.left < timelineRect.left) {
     	// We need to scroll left
-    	timeline.scrollLeft -= timelineRect.left - rect.left + width
-    } else if (rect.right > timeline.clientWidth + timelineRect.left) {
+    	timescroll.scrollLeft -= timelineRect.left - rect.left + width
+    } else if (rect.right > timescroll.clientWidth + timelineRect.left) {
     	// We need to scroll right
-    	timeline.scrollLeft += rect.right - (timeline.clientWidth + timelineRect.left) + width
+    	timescroll.scrollLeft += rect.right - (timescroll.clientWidth + timelineRect.left) + width
     }
 }

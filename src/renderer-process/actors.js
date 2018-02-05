@@ -7,6 +7,11 @@ const utility = require('./utility')
 // Vars
 let dropdowns = []
 
+// DOM Elements
+let domActors = document.getElementById("actors")
+let domTimeline = document.getElementById("time-scroll")
+let domInspector = document.getElementById("inspectorTarget")
+
 exports.actors = []
 
 exports.init = function() {	
@@ -17,8 +22,6 @@ exports.init = function() {
 }
 
 exports.addActor = function(i) {
-	let domActors = document.getElementById("actors")
-	let domTimeline = document.getElementById("time-scroll")
 	let domActor = document.createElement("div")
 
 	domActor.id = "actor " + i
@@ -120,7 +123,7 @@ function renameActor(e) {
 		}
 		
 		if (inspector.target === e.target.actor)
-			document.getElementById("inspectorTarget").innerText = e.target.value
+			domInspector.innerText = e.target.value
 		
 		let puppet = stage.getPuppet(exports.actors[e.target.actor])
 		if (puppet) puppet.id = puppet.container.id = e.target.value
@@ -139,8 +142,8 @@ function removeActor(e) {
 	exports.actors[actor] = null
 
 	if (inspector.target == actor) inspector.update(-1)
-	document.getElementById("actors").removeChild(document.getElementById("actor " + actor))
-	document.getElementById("time-scroll").removeChild(document.getElementById("timeline actor " + actor))
+	domActors.removeChild(document.getElementById("actor " + actor))
+	domTimeline.removeChild(document.getElementById("timeline actor " + actor))
 
 	let keyframes = Object.keys(timeline.keyframes)
 	for (let i = 0; i < keyframes.length; i++) {

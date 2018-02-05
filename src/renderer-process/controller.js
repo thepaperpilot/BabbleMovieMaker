@@ -20,6 +20,13 @@ let rendering = 0
 let opague
 let transparent
 
+// DOM Elements
+let screenDom = document.getElementById('screen')
+let statusDom = document.getElementById('status')
+let bottomDom = document.getElementById('bottom')
+let sideDom = document.getElementById('side')
+let domFrames = document.getElementById("frames")
+
 exports.puppetKeys = puppetKeys
 
 exports.init = function() {
@@ -49,11 +56,11 @@ exports.export = function() {
 	timeline.gotoFrame(0)
 
 	// TODO view changer
-	document.getElementById('screen').style.width = project.project.resolution.split("x")[0] + "px"
-	document.getElementById('screen').style.height = project.project.resolution.split("x")[1] + "px"
-	document.getElementById('status').style.width = (project.project.resolution.split("x")[0] - 20) + "px"
-	document.getElementById('bottom').style.width = (project.project.resolution.split("x")[0] - 20) + "px"
-	document.getElementById('side').style.display = 'none'
+	screenDom.style.width = project.project.resolution.split("x")[0] + "px"
+	screenDom.style.height = project.project.resolution.split("x")[1] + "px"
+	statusDom.style.width = (project.project.resolution.split("x")[0] - 20) + "px"
+	bottomDom.style.width = (project.project.resolution.split("x")[0] - 20) + "px"
+	sideDom.style.display = 'none'
 	renderer = new Gif({
 		// TODO let them choose if they want transparency, and what quality to render at
 		workers: navigator.hardwareConcurrency,
@@ -214,7 +221,6 @@ function readScript() {
 		stage.update(1000 / project.project.fps)
 	}
 
-	let domFrames = document.getElementById("frames")
 	for (let i = 0; i < timeline.frames + timeline.bufferFrames; i++) {
 		let domFrame = document.createElement("div")
 		domFrame.id = "frame " + i
@@ -281,11 +287,11 @@ function renderFrame() {
 	else {
 		renderer.render()
 	    rendering = 0
-		document.getElementById('screen').style.width = ''
-		document.getElementById('screen').style.height = ''
-		document.getElementById('status').style.width = ''
-		document.getElementById('bottom').style.width = ''
-		document.getElementById('side').style.display = ''
+		screenDom.style.width = ''
+		screenDom.style.height = ''
+		statusDom.style.width = ''
+		bottomDom.style.width = ''
+		sideDom.style.display = ''
 		exports.resize()
 	}
 }

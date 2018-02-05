@@ -29,7 +29,7 @@ input, .checkbox-label {
 	margin-top: 8px;
 }
 
-input[type="text"], input[type="password"], input[type="number"], input[type="search"], select {
+input[type="text"], input[type="puppet"], input[type="password"], input[type="number"], input[type="search"], select {
 	background: none;
 	border: none;
 	border-bottom: solid 2px #969696;
@@ -40,7 +40,7 @@ input[type="text"], input[type="password"], input[type="number"], input[type="se
 	margin-top: 8px;
 }
 
-input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, input[type="search"]:focus, select:focus {
+input[type="text"]:focus, input[type="puppet"]:focus, input[type="password"]:focus, input[type="number"]:focus, input[type="search"]:focus, select:focus {
 	border-bottom: solid 2px #c9c9c9;
 	outline: none;
 }
@@ -564,11 +564,11 @@ h4 {
     background-color: transparent;
 }
 
-.horiz-scroll::-webkit-scrollbar {
+.horiz-scroll::-webkit-scrollbar, .fill-horiz-scroll::-webkit-scrollbar {
     width: 18px;
     height: 14px;
 }
-.horiz-scroll::-webkit-scrollbar-thumb {
+.horiz-scroll::-webkit-scrollbar-thumb, .fill-horiz-scroll::-webkit-scrollbar-thumb {
     height: 6px;
     border: 4px solid rgba(0, 0, 0, 0);
     background-clip: padding-box;
@@ -576,12 +576,12 @@ h4 {
     background-color: rgba(0, 0, 0, 0.15);
     -webkit-box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);
 }
-.horiz-scroll::-webkit-scrollbar-button {
+.horiz-scroll::-webkit-scrollbar-button, .fill-horiz-scroll::-webkit-scrollbar-button {
     width: 0;
     height: 0;
     display: none;
 }
-.horiz-scroll::-webkit-scrollbar-corner {
+.horiz-scroll::-webkit-scrollbar-corner, .fill-horiz-scroll::-webkit-scrollbar-corner {
     background-color: transparent;
 }
 
@@ -675,7 +675,6 @@ h4 {
     position: relative;
     display: inline-block;
     box-sizing: border-box;
-    cursor: pointer;
 }
 
 .frames .frame {
@@ -926,4 +925,51 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .complete {
 	background-image: url(../icons/complete.png);
+}
+
+.fill-horiz-scroll {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    overflow-x: scroll;
+    justify-content: space-around;
+    height: 100%;
+    margin-left: -12px;
+}
+
+.char {
+	background-color: #2a323d;
+    border: 2px solid #333c4a;
+	color: #fff;
+	cursor: pointer;
+	display: inline-block;
+	height: 120px;
+	margin: 4px 4px 0 4px;
+	position: relative;
+	width: 120px;
+}
+
+.char img {
+	object-fit: contain;
+}
+
+input[type="puppet"] {
+    margin-left: 8px;
+    box-sizing: border-box;
+    background: url(../icons/face.png) no-repeat;
+    padding-left: 24px;
+    background-size: 20px 20px;
+    background-position: 2px 2px;
+}
+
+input[type="puppet"].place {
+	border-bottom: none;
+    box-shadow: 0 0 8px 1px goldenrod;
+    width: calc(100% - 16px);
+    border-radius: 8px;
+    margin-bottom: 26px;
+}
+
+body.crosshair, body.crosshair * {
+	cursor: crosshair !important;
 }

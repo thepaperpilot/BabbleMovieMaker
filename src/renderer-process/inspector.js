@@ -7,10 +7,16 @@ const utility = require('./utility')
 
 // Vars
 let dropdowns = []
+let puppet 		// Used  for dragging puppets from puppet drawer
 
-// Used for clicking add command menu
-let addActionPanel
-let addActionButton
+// DOM Elements
+let addActionButton = document.getElementById("addActionButton")
+let addActionPanel = document.getElementById("addActionPanel")
+let actionsDom = document.getElementById("actions")
+let actionSearchDom = document.getElementById("actionSearch")
+let actionsListDom = document.getElementById("actionsList")
+let domInspector = document.getElementById("inspectorTarget")
+let domFramecount = document.getElementById("framecount")
 
 var commandFields = {
 	text: function(parent, field, frame, action, key) {
@@ -32,15 +38,17 @@ var commandFields = {
 	puppet: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
-		
+
 		let textbox = document.createElement("input")
-		textbox.style.display = 'block'
-		textbox.type = "text"
+		textbox.type = "puppet" // Will appear as a text field
+		textbox.puppetField = true	// because apparently when we check its type, it still says text :/
 		textbox.frame = frame
 		textbox.action = action
 		textbox.key = key
 		textbox.value = action[key]
 		textbox.addEventListener("change", editText)
+		textbox.addEventListener("mouseenter", enterPuppetField)
+		textbox.addEventListener("mouseleave", exitPuppetField)
 		
 		parent.appendChild(titleElement)
 		parent.appendChild(textbox)
@@ -175,12 +183,11 @@ exports.target = null
 
 exports.init = function() {
 	window.addEventListener("resize", () => {toggleDropdowns()})
+    window.addEventListener('mouseup', dropPuppet, false)
 	document.addEventListener("click", toggleActionPanel)
 	document.addEventListener("click", toggleDropdowns)
-	addActionButton = document.getElementById("addActionButton")
-	addActionPanel = document.getElementById("addActionPanel")
-	document.getElementById("actions").addEventListener("wheel", () => {toggleDropdowns()})
-	document.getElementById("actionSearch").addEventListener("input", searchCommands)
+	actionsDom.addEventListener("wheel", () => {toggleDropdowns()})
+	actionSearchDom.addEventListener("input", searchCommands)
 }
 
 // -1 is the frame, null is the current target, any other number is the index of the actor
@@ -191,8 +198,7 @@ exports.update = function(actor) {
 	// if target is set XOR id is set
 	// this means we are transitioning from being on a frame to an actor, or vice versa
 	if ((exports.target === null) != (actor === null)) {
-		let actions = document.getElementById("actionsList")
-		actions.innerHTML = ''
+		actionsListDom.innerHTML = ''
 		let needsId = (actor !== null)
 		let commands = Object.keys(project.project.commands)
 		for (let i = 0; i < commands.length; i++) {
@@ -202,7 +208,7 @@ exports.update = function(actor) {
 				actionElement.innerText = action.title
 				actionElement.command = commands[i]
 				actionElement.addEventListener("click", addAction)
-				actions.appendChild(actionElement)
+				actionsListDom.appendChild(actionElement)
 			}
 		}
 	}
@@ -210,8 +216,8 @@ exports.update = function(actor) {
 	let frame = timeline.frame
 	let frames = timeline.frames
 	let keyframe = timeline.keyframes[frame]
-	document.getElementById("inspectorTarget").innerText = id !== null ? id : "Frame " + (frame + 1)
-	document.getElementById("framecount").innerText = "Frame " + (frame + 1) + " / " + (frames + 1)
+	domInspector.innerText = id !== null ? id : "Frame " + (frame + 1)
+	domFramecount.innerText = "Frame " + (frame + 1) + " / " + (frames + 1)
 
 	// Remove actor's currentFrame indicator, but not the frame's currentFrame indicator
 	let node = document.body.getElementsByClassName("currentframe")[1]
@@ -221,8 +227,7 @@ exports.update = function(actor) {
 	}
 	if (id !== null) document.getElementById("actor " + actor + " frame " + frame).classList.add("currentframe")
 
-	let actions = document.getElementById("actions")
-	actions.innerHTML = ''
+	actionsDom.innerHTML = ''
 	dropdowns = []
 
 	// Add information about the actor's puppet
@@ -247,7 +252,7 @@ exports.update = function(actor) {
 			
 			puppetInfo.appendChild(titleElement)
 			puppetInfo.appendChild(infoElement)
-			actions.appendChild(puppetInfo)
+			actionsDom.appendChild(puppetInfo)
 		}
 	}
 
@@ -263,7 +268,7 @@ exports.update = function(actor) {
 				if (endFrame >= frame) {
 					let command  = project.project.commands[action.command]
 					let actionElement = document.createElement("div")
-					actions.appendChild(actionElement)
+					actionsDom.appendChild(actionElement)
 					actionElement.classList.add("action")
 					actionElement.classList.add("folded")
 					addTitle(actionElement, action, i).frame =  keyframes[i]
@@ -303,7 +308,7 @@ exports.update = function(actor) {
 			if (project.project.commands[action.command]) {
 				let command  = project.project.commands[action.command]
 				let actionElement = document.createElement("div")
-				actions.appendChild(actionElement)
+				actionsDom.appendChild(actionElement)
 				actionElement.classList.add("action")
 				addTitle(actionElement, action, i)
 				let fields = Object.keys(command.fields)
@@ -373,6 +378,55 @@ exports.removeAction = function(e) {
 	
 	timeline.simulateFromFrame()
     exports.update()
+}
+
+exports.dragPuppet = function(e) {
+	if (puppet) return
+
+    puppet = e.target
+    puppet.dragging = puppet.clicked = false
+    puppet.style.zIndex = '2'
+    puppet.style.position = 'fixed'
+    puppet.style.pointerEvents = "none"
+    puppet.style.top = (e.clientY - 10) + 'px'
+    puppet.style.left = (e.clientX - 10) + 'px'
+    document.body.classList.add("crosshair")
+    e.preventDefault()
+    window.addEventListener('mousemove', movePuppet, true);
+}
+
+function movePuppet(e) {
+	puppet.dragging = true
+    puppet.style.top = (e.clientY - 10) + 'px'
+    puppet.style.left = (e.clientX - 10) + 'px'
+}
+
+function dropPuppet(e) {
+	if (puppet) {
+		if (puppet.dragging || puppet.clicked) {
+			if (e.target.tagName.toUpperCase() == "INPUT" && e.target.puppetField) {
+				e.target.value = puppet.name
+				e.target.classList.remove("place")
+			}
+
+			window.removeEventListener('mousemove', movePuppet, true);
+            puppet.style.position = 'static'
+    		puppet.style.pointerEvents = ""
+            puppet.style.top = puppet.style.left = ""
+            puppet.style.width = puppet.style.height = 120 + "px"
+            puppet.style.zIndex = ''
+    		document.body.classList.remove("crosshair")
+            puppet = null
+		} else puppet.clicked = true
+	}
+}
+
+function enterPuppetField(e) {
+	if (puppet) e.target.classList.add("place")
+}
+
+function exitPuppetField(e) {
+	if (puppet) e.target.classList.remove("place")
 }
 
 function addAction(e) {
@@ -490,11 +544,11 @@ function editEmote(e) {
 }
 
 function toggleActionPanel(e) {
-	let classes = document.getElementById("addActionPanel").classList
+	let classes = addActionPanel.classList
 	if (!!e && utility.checkParent(e.target, addActionButton)) {
 		if (classes.contains("collapsed")) {
 			classes.remove("collapsed")
-			document.getElementById("actionSearch").focus()
+			actionSearchDom.focus()
 		} else classes.add("collapsed")
 	} else classes.add("collapsed")
 }
@@ -530,14 +584,13 @@ function updateDropdownPositions() {
 }
 
 function searchCommands(e) {
-	let actions = document.getElementById('actionsList')
     if (e.target.value === '') {
-        for (let i = 0; i < actions.children.length; i++)
-            actions.children[i].style.display = 'block'
+        for (let i = 0; i < actionsListDom.children.length; i++)
+            actionsListDom.children[i].style.display = 'block'
     } else {
-        for (let i = 0; i < actions.children.length; i++)
-            actions.children[i].style.display = 'none'
-        let commands = Array.from(actions.children).filter(el => el.textContent.toLowerCase().includes(e.target.value.toLowerCase()))
+        for (let i = 0; i < actionsListDom.children.length; i++)
+            actionsListDom.children[i].style.display = 'none'
+        let commands = Array.from(actionsListDom.children).filter(el => el.textContent.toLowerCase().includes(e.target.value.toLowerCase()))
         for (let i = 0; i < commands.length; i++) {
             commands[i].style.display = 'block'
         }

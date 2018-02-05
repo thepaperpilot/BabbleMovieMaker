@@ -2,6 +2,7 @@
 const controller = require('./controller')
 const status = require('./status')
 const timeline = require('./timeline')
+const inspector = require('./inspector')
 
 const remote = require('electron').remote
 const dialog = remote.dialog
@@ -11,6 +12,9 @@ const path = require('path')
 const main = remote.require('./main')
 const settings = remote.require('./main-process/settings')
 const menu = remote.require('./main-process/menus/application-menu')
+
+// DOM Elements
+let puppets = document.getElementById("puppetsList")
 
 exports.defaults = {
 	"clientVersion": "1.0.0",
@@ -156,6 +160,7 @@ exports.readProject = function() {
 		status.init()
 		status.log('Loading project...', 1, 1)
 
+		this.assetsPath = path.join(filepath, '..', 'assets')
 		this.project = Object.assign({}, this.defaults)
 		Object.assign(this.project, proj)
 		this.scripts = fs.existsSync(path.join(filepath, '..', 'scripts.json')) ? fs.readJsonSync(path.join(filepath, '..', 'scripts.json')) : []
@@ -163,8 +168,6 @@ exports.readProject = function() {
 
 		this.oldProject = JSON.stringify(proj)
 		this.oldScripts = JSON.stringify(this.scripts)
-
-		this.assetsPath = path.join(filepath, '..', 'assets')
 
 		settings.settings.openProject = filepath
 		settings.save()
@@ -285,6 +288,28 @@ function reloadBabble() {
 	}
 	if (exports.oldPuppets != null && exports.oldPuppets !== JSON.stringify(exports.puppets)) { // jshint ignore: line
 		timeline.resimulate()
+	}
+
+	// Create the puppet drawer
+	if (exports.oldPuppets == null || exports.oldPuppets !== JSON.stringify(exports.puppets)) { //jshint ignore: line
+		puppets.innerHTML = ''
+		for (let i = 0; i < babble.characters.length; i++) {
+			let name = babble.characters[i].name
+			let selector = document.createElement('div')
+			let thumbnail = babble.characters[i].location.substr(0, babble.characters[i].location.lastIndexOf('.')) + '.png'
+			
+			selector.className = "char"
+			selector.innerHTML = '<div class="desc">' + name + '</div>'
+			
+			let puppetDraggable = document.createElement('img')
+		    selector.appendChild(puppetDraggable)
+		    puppetDraggable.name = name
+		    puppetDraggable.style.height = puppetDraggable.style.width = '120px'
+			puppetDraggable.src = path.join(exports.assetsPath, '..', 'thumbnails', thumbnail + '?random=' + new Date().getTime()).replace(/\\/g, '/')
+		    puppetDraggable.addEventListener('mousedown', inspector.dragPuppet, false)
+
+			puppets.appendChild(selector)
+		}
 	}
 
 	// Save current state
