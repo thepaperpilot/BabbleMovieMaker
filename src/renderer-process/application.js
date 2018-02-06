@@ -76,7 +76,7 @@ exports.init = function() {
 function keyDown(e) {
 	let key = e.keyCode ? e.keyCode : e.which
 
-	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one' || e.target.type === 'password'))
+	if (e.target && (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'search' || e.target.type === 'select-one' || e.target.type === 'password' || e.target.tagName.toUpperCase() === "TEXTAREA"))
 		return
 
 	let handled = true

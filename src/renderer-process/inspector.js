@@ -22,18 +22,29 @@ var commandFields = {
 	text: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
+
+		let wrapper = document.createElement("div")
+		wrapper.classList.add("textarea-container")
 		
-		let textbox = document.createElement("input")
+		let textbox = document.createElement("textarea")
 		textbox.style.display = 'block'
-		textbox.type = "text"
 		textbox.frame = frame
 		textbox.action = action
 		textbox.key = key
 		textbox.value = action[key]
 		textbox.addEventListener("change", editText)
+		textbox.addEventListener("input", resizeTextbox)
+
+		let sizedTextbox = document.createElement("div")
+		sizedTextbox.classList.add("textarea-size")
+		textbox.sizedTextbox = sizedTextbox
 		
+		wrapper.appendChild(textbox)
+		wrapper.appendChild(sizedTextbox)
 		parent.appendChild(titleElement)
-		parent.appendChild(textbox)
+		parent.appendChild(wrapper)
+
+		resizeTextbox({target: textbox})
 	},
 	puppet: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")
@@ -593,4 +604,8 @@ function searchCommands(e) {
             commands[i].style.display = 'block'
         }
 	}
+}
+
+function resizeTextbox(e) {
+	e.target.sizedTextbox.innerText = e.target.value + "\n"
 }
