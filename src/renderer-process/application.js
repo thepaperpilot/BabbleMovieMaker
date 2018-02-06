@@ -202,6 +202,7 @@ function colorpickerChange(e) {
 
 function fpsChange(e) {
 	project.project.fps = parseFloat(e.target.value)
+	controller.readScript()
 	controller.resize()
 }
 

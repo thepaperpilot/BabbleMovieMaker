@@ -146,12 +146,12 @@ function start() {
 			addCutscene(keys[i], false)
 		}
 		openCutscene({target: domCutscenes.children[2]})
-		readScript()
+		exports.readScript()
 		// Protection against start being called before stage constructor returns, like it'll do in the event of there being no assets to load
 	} else requestAnimationFrame(start)
 }
 
-function readScript() {
+exports.readScript = function() {
 	stage.clearPuppets()
 	timeline.reset(true)
 	let frame = 0
@@ -362,7 +362,7 @@ function renameCutscene(e) {
 
 function readCutscene() {
 	exports.script = cutscene
-	readScript()
+	exports.readScript()
 	application.closePanels()
 }
 
@@ -373,7 +373,7 @@ function deleteCutscene() {
 	if (exports.script == cutscene) {
 		openCutscene({target: domCutscenes.children[domCutscenes.children.length > index ? index : index - 1]})
 		exports.script = cutscene
-		readScript()
+		exports.readScript()
 	} else {
 		openCutscene({target: domCutscenes.children[domCutscenes.children.length > index ? index : index - 1]})
 	}
