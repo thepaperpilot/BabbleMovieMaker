@@ -90,6 +90,11 @@ exports.addFrame = function(actor, frame) {
 		}
 }
 
+exports.reset = function() {
+	domActors.innerHTML = ''
+	exports.actors = []
+}
+
 function selectActor(e) {
 	timeline.gotoFrame(e.target.frame)
 	inspector.update(e.target.actor)

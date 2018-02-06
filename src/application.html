@@ -15,6 +15,7 @@
                     <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label">Green Screen</label>
                     <button id="settings" class="button-tab">Project Settings</button>
                     <button id="puppets" class="button-tab">Puppet Drawer</button>
+                    <button id="cutscenes" class="button-tab">Cutscenes List</button>
                     <button id="commands" class="button-tab">Edit Commands</button>
                     <button id="export">Export Movie</button>
                 </div>
@@ -66,6 +67,19 @@
                 </div>
                 <div id="puppets-panel" class="s8" style="display: none;">
                     <div id="puppetsList" class="fill-horiz-scroll"></div>
+                </div>
+                <div id="cutscenes-panel" class="s8" style="display: none;">
+                    <div id="cutscenesList" class="buttons s2 scroll" style="border-right-color: #242a33">
+                        <button id="addCutscene" style="margin: 0;height: 30px;width: 100%;">Add Cutscene</button>
+                        <br/>
+                    </div>
+                    <div class="s8 commandEditor">
+                        <div id="cutsceneEditor" class="scroll" style="height: calc(100% - 8px)">
+                            <input type="text" id="cutsceneName" placeholder="Cutscene Name (must be unique, can't be blank)">
+                            <button id="openCutscene">Open Cutscene</button>
+                            <button id="deleteCutscene">Delete Cutscene</button>
+                        </div>
+                    </div>
                 </div>
                 <div id="commands-panel" class="s8" style="display: none;">
                     <div id="commandsList" class="buttons s2 scroll" style="border-right-color: #242a33">

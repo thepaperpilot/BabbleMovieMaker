@@ -20,6 +20,7 @@ let renderer
 let rendering = 0
 let opague
 let transparent
+let cutscene
 
 // DOM Elements
 let screenDom = document.getElementById('screen')
@@ -27,8 +28,15 @@ let statusDom = document.getElementById('status')
 let bottomDom = document.getElementById('bottom')
 let sideDom = document.getElementById('side')
 let domFrames = document.getElementById("frames")
+let domSelectedCutscenes = document.getElementsByClassName("selected cutscene")
+let addCutsceneButton = document.getElementById("addCutscene")
+let openCutsceneButton = document.getElementById("openCutscene")
+let deleteCutsceneButton = document.getElementById("deleteCutscene")
+let domCutscenes = document.getElementById("cutscenesList")
+let domCutsceneName = document.getElementById("cutsceneName")
 
 exports.puppetKeys = puppetKeys
+exports.script = null
 
 exports.init = function() {
 	// Creating stage as a global, because f*** it
@@ -36,6 +44,10 @@ exports.init = function() {
 	stage.registerPuppetListener("click", (e) => { inspector.update(actors.actors.indexOf(e.target.id)) })
 	stage.renderer.view.classList.add("container")
 	stage.renderer.view.style.padding = 0
+	addCutsceneButton.addEventListener("click", createCutscene)
+	domCutsceneName.addEventListener("change", renameCutscene)
+	openCutsceneButton.addEventListener("click", readCutscene)
+	deleteCutsceneButton.addEventListener("click", deleteCutscene)
 
 	// Init other files
 	application.init()
@@ -128,6 +140,12 @@ function start() {
 	if (stage) {
 		status.log('Project Loaded!', 1, 1)
 		exports.resize()
+		let keys = Object.keys(project.scripts)
+		exports.script = keys[0]
+		for (let i = 0; i < keys.length; i++) {
+			addCutscene(keys[i], false)
+		}
+		openCutscene({target: domCutscenes.children[2]})
 		readScript()
 		// Protection against start being called before stage constructor returns, like it'll do in the event of there being no assets to load
 	} else requestAnimationFrame(start)
@@ -135,9 +153,9 @@ function start() {
 
 function readScript() {
 	stage.clearPuppets()
-	timeline.reset()
+	timeline.reset(true)
 	let frame = 0
-	let cutscene = new babble.Cutscene(stage, project.scripts, project.puppets, () => { if (timeline.frames === null || frame > timeline.frames) timeline.frames = frame })
+	let cutscene = new babble.Cutscene(stage, project.scripts[exports.script], project.puppets, () => { if (timeline.frames === null || frame > timeline.frames) timeline.frames = frame })
 	cutscene.actions.delay = function(callback, action) {
 		// Normal delay behavior
         if (action.delay <= 0) requestAnimationFrame(callback)
@@ -152,7 +170,6 @@ function readScript() {
     	let endFrame = parseInt(frame) + Math.ceil(action.delay * project.project.fps / 1000)
     	if (timeline.frames === null || endFrame > timeline.frames) timeline.frames = endFrame
     }
-	actors.actors = []
 	cutscene.parseNextAction = function(script, callback) {
         // Check if script is complete
         if (script.length === 0) {
@@ -295,5 +312,70 @@ function renderFrame() {
 		bottomDom.style.width = ''
 		sideDom.style.display = ''
 		exports.resize()
+	}
+}
+
+function createCutscene() {
+	let name = "New Cutscene"
+	let i = 1
+	while (name in project.scripts)
+		name = "New Cutscene " + (i++)
+
+	project.scripts[name] = []
+	addCutscene(name)
+}
+
+function addCutscene(name, open = true) {
+	let domCutscene = document.createElement("div")
+			
+	domCutscene.name = name
+	domCutscene.innerText = name
+	domCutscene.classList.add("cutscene")
+	domCutscene.addEventListener("click", openCutscene)
+
+	domCutscenes.appendChild(domCutscene)
+	if (open) openCutscene({target: domCutscene})
+}
+
+function openCutscene(e) {
+	while (domSelectedCutscenes[0])
+		domSelectedCutscenes[0].classList.remove("selected")
+	e.target.classList.add("selected")
+	cutscene = e.target.name
+	console.log(cutscene)
+
+	domCutsceneName.value = cutscene
+	deleteCutsceneButton.disabled = Object.keys(project.scripts).length === 1
+}
+
+function renameCutscene(e) {
+	if (e.target.value === "" || project.scripts[e.target.value]) {
+		e.target.value = cutscene
+	} else {
+		let index = Object.keys(project.scripts).indexOf(cutscene) + 2
+		project.scripts[e.target.value] = project.scripts[cutscene]
+		delete project.scripts[cutscene]
+		if (exports.script == cutscene) exports.script = e.target.value
+		cutscene = e.target.value
+		domCutscenes.children[index].innerText = domCutscenes.children[index].name = e.target.value
+	}
+}
+
+function readCutscene() {
+	exports.script = cutscene
+	readScript()
+	application.closePanels()
+}
+
+function deleteCutscene() {
+	let index = Object.keys(project.scripts).indexOf(cutscene) + 2
+	delete project.scripts[cutscene]
+	domCutscenes.removeChild(domCutscenes.children[index])
+	if (exports.script == cutscene) {
+		openCutscene({target: domCutscenes.children[domCutscenes.children.length > index ? index : index - 1]})
+		exports.script = cutscene
+		readScript()
+	} else {
+		openCutscene({target: domCutscenes.children[domCutscenes.children.length > index ? index : index - 1]})
 	}
 }

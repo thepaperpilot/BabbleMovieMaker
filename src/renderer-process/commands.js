@@ -54,7 +54,7 @@ exports.init = function() {
 
 	let commands = Object.keys(project.project.commands)
 	for (let i = 0; i < commands.length; i++) {
-		addCommand(commands[i])
+		addCommand(commands[i], false)
 	}
 	openCommand({target: domCommands.children[2]}) // Yay for hardcoding, I'm sure I won't ever forget why this is a 2
 }
@@ -74,7 +74,7 @@ function createCommand() {
 	addCommand(name, command)
 }
 
-function addCommand(name) {
+function addCommand(name, open = true) {
 	let domCommand = document.createElement("div")
 
 	domCommand.name = name
@@ -85,7 +85,7 @@ function addCommand(name) {
 	domCommands.appendChild(domCommand)
 
 	inspector.updateAddActionPanel(inspector.target !== -1)
-	openCommand({target: domCommand})
+	if (open) openCommand({target: domCommand})
 }
 
 function openCommand(e) {

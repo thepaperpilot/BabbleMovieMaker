@@ -972,19 +972,19 @@ body.crosshair, body.crosshair * {
 	cursor: crosshair !important;
 }
 
-.command {
+.command, .cutscene {
     padding: 4px;
     background: #242a33;
     border: solid 1px grey;
     margin-bottom: -1px;
 }
 
-.command:hover {
+.command:hover, .cutscene:hover {
 	background: #2a323d;
     cursor: pointer;
 }
 
-.command:last-child {
+.command:last-child, .cutscene:last-child {
     margin-bottom: 4px;
 }
 

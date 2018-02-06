@@ -171,7 +171,7 @@ exports.readProject = function() {
 		this.assetsPath = path.join(filepath, '..', 'assets')
 		this.project = Object.assign({}, this.defaults)
 		Object.assign(this.project, proj)
-		this.scripts = fs.existsSync(path.join(filepath, '..', 'scripts.json')) ? fs.readJsonSync(path.join(filepath, '..', 'scripts.json')) : []
+		this.scripts = fs.existsSync(path.join(filepath, '..', 'scripts.json')) ? fs.readJsonSync(path.join(filepath, '..', 'scripts.json')) : { "My Cutscene": [] }
 		reloadBabble()
 
 		this.oldProject = JSON.stringify(proj)

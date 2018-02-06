@@ -38,9 +38,16 @@ exports.init = function() {
 	}
 }
 
-exports.reset = function() {
+exports.reset = function(hard = false) {
 	keyframes = exports.keyframes = {}
 	exports.frames = exports.frame = null
+
+	if (hard) {
+		domFrames.innerHTML = ""
+		while (timescroll.children[1])
+			timescroll.removeChild(timescroll.children[1])
+		actors.reset()
+	}
 }
 
 exports.prevFrame = function() {
@@ -248,7 +255,7 @@ exports.simulateFromFrame = function(frame) {
 	}
 
 	currentFrame = null
-	project.scripts = exports.generateScript()
+	project.scripts[controller.script] = exports.generateScript()
 	exports.gotoFrame(origFrame, false)
 }
 

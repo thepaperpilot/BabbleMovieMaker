@@ -259,6 +259,7 @@ exports.update = function(actor) {
 
 	// Find previous keyframes and add any actions that are ongoing up to this frame
 	let keyframes = Object.keys(timeline.keyframes)
+	let prevActions = 0
 	for (let i = 0; i < keyframes.length; i++) {
 		if (keyframes[i] >= frame) break
 		for (let j = 0; j < timeline.keyframes[keyframes[i]].actions.length; j++) {
@@ -267,6 +268,7 @@ exports.update = function(actor) {
 			if (action.delay) {
 				let endFrame = parseInt(keyframes[i]) + Math.ceil(action.delay * project.project.fps / 1000)
 				if (endFrame >= frame) {
+					prevActions++
 					let command  = project.project.commands[action.command]
 					let actionElement = document.createElement("div")
 					actionsDom.appendChild(actionElement)
@@ -311,12 +313,12 @@ exports.update = function(actor) {
 				let actionElement = document.createElement("div")
 				actionsDom.appendChild(actionElement)
 				actionElement.classList.add("action")
-				addTitle(actionElement, action, i)
+				addTitle(actionElement, action, i + prevActions)
 				let fields = Object.keys(command.fields)
 				for (let j = 0; j < fields.length; j++) {
 					let fieldGenerator = commandFields[command.fields[fields[j]].type]
 					if (fieldGenerator) 
-						fieldGenerator(actionElement, command.fields[fields[j]], frame, action, fields[j], i)
+						fieldGenerator(actionElement, command.fields[fields[j]], frame, action, fields[j], i + prevActions)
 				}
 				if (action.error) {
 					let error = document.createElement("div")
@@ -357,6 +359,7 @@ exports.removeAction = function(e) {
 	let frame = e.target && e.target.frame != null ? e.target.frame : timeline.frame // jshint ignore: line
 	let keyframe = timeline.keyframes[frame]
 
+	console.log(action)
 	if (action.delay) {
 		let frameIndex = frame + Math.ceil(action.delay * project.project.fps / 1000)
 		let id = "frame " + frameIndex
