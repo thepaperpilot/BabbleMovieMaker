@@ -426,6 +426,7 @@ function dropPuppet(e) {
 		if (puppet.dragging || puppet.clicked) {
 			if (e.target.tagName.toUpperCase() == "INPUT" && e.target.puppetField) {
 				e.target.value = puppet.name
+				editText(e)
 				e.target.classList.remove("place")
 			}
 
