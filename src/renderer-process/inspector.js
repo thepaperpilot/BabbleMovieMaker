@@ -157,7 +157,9 @@ var commandFields = {
 		select.addEventListener("change", editEmote)
 
 		// populate 
-		let puppet = action.name ? project.puppets[action.name] : 
+		let name = Object.keys(action).filter(key => 
+			project.project.commands[action.command].fields[key] && project.project.commands[action.command].fields[key].type === "puppet")[0]
+		let puppet = name !== null && project.puppets[action[name]] ? project.puppets[action[name]] : 
 			stage.getPuppet(action.target) ? 
 			stage.getPuppet(action.target).container.puppet : null
 		if (puppet != null) { // jshint ignore: line
@@ -179,7 +181,7 @@ var commandFields = {
 	}
 }
 
-exports.target = null
+exports.target = -1
 
 exports.init = function() {
 	window.addEventListener("resize", () => {toggleDropdowns()})
@@ -197,20 +199,8 @@ exports.update = function(actor) {
 
 	// if target is set XOR id is set
 	// this means we are transitioning from being on a frame to an actor, or vice versa
-	if ((exports.target === null) != (actor === null)) {
-		actionsListDom.innerHTML = ''
-		let needsId = (actor !== null)
-		let commands = Object.keys(project.project.commands)
-		for (let i = 0; i < commands.length; i++) {
-			let action = project.project.commands[commands[i]]
-			if (needsId == ('id' in action.fields || 'target' in action.fields)) {
-				let actionElement = document.createElement("div")
-				actionElement.innerText = action.title
-				actionElement.command = commands[i]
-				actionElement.addEventListener("click", addAction)
-				actionsListDom.appendChild(actionElement)
-			}
-		}
+	if ((exports.target === -1) != (actor === -1)) {
+		exports.updateAddActionPanel(actor !== -1)
 	}
 	exports.target = actor
 	let frame = timeline.frame
@@ -245,7 +235,7 @@ exports.update = function(actor) {
 			let titleElement = document.createElement("h4")
 			titleElement.innerText = "Puppet Information"
 			titleElement.style.cursor = "pointer"
-			titleElement.addEventListener("click", foldAction)
+			titleElement.addEventListener("click", utility.toggleFolded)
 
 			let infoElement = document.createElement("pre")
 			infoElement.innerText = JSON.stringify(info, null, 4)
@@ -335,8 +325,24 @@ exports.update = function(actor) {
 		}
 }
 
+exports.updateAddActionPanel = function(needsActor) {
+	actionsListDom.innerHTML = ''
+	let commands = Object.keys(project.project.commands)
+	for (let i = 0; i < commands.length; i++) {
+		let action = project.project.commands[commands[i]]
+		if (needsActor == ('id' in action.fields || 'target' in action.fields)) {
+			let actionElement = document.createElement("div")
+			actionElement.innerText = action.title
+			actionElement.command = commands[i]
+			actionElement.addEventListener("click", addAction)
+			actionsListDom.appendChild(actionElement)
+		}
+	}
+}
+
+// Returns true if keyframe was made empty and deleted
 exports.removeAction = function(e) {
-	let action = e.target ? e.target.parentNode.action : e
+	let action = e.target && e.target.parentNode ? e.target.parentNode.action : e
 	let frame = e.target && e.target.frame != null ? e.target.frame : timeline.frame // jshint ignore: line
 	let keyframe = timeline.keyframes[frame]
 
@@ -458,7 +464,7 @@ function addTitle(parent, action, i) {
 	let titleElement = document.createElement("h4")
 	titleElement.innerText = project.project.commands[action.command].title
 	titleElement.style.cursor = "pointer"
-	titleElement.addEventListener("click", foldAction)
+	titleElement.addEventListener("click", utility.toggleFolded)
 
 	let checkbox = document.createElement("input")
 	checkbox.id = "action settings " + i
@@ -489,14 +495,6 @@ function addTitle(parent, action, i) {
 	parent.parentNode.appendChild(dropdown)
 
 	return titleElement
-}
-
-function foldAction(e) {
-	let classList = e.target.parentNode.classList
-
-	if (classList.contains("folded"))
-		classList.remove("folded")
-	else classList.add("folded")
 }
 
 function editText(e) {

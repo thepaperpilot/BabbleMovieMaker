@@ -139,6 +139,7 @@ exports.simulateFromFrame = function(frame) {
 
 		for (let j = 0; j < keyframe.actions.length; j++) {
 			let action = keyframe.actions[j]
+			if (!(action.command in psuedoCutscene.actions)) continue
 			action.error = null
 			if (action.delay) {
 				let frameIndex = currentFrame + Math.ceil(action.delay * project.project.fps / 1000)
@@ -163,7 +164,8 @@ exports.simulateFromFrame = function(frame) {
 				action.error = e.message
 				document.getElementById("frame " + currentFrame).classList.add("warning")
 				let actor = "id" in action ? action.id : 'target' in action ? action.target : null
-				document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + currentFrame).classList.add("warning")
+				if (actor !== null) 
+					document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + currentFrame).classList.add("warning")
 			}
 			if (action.delay) {
 				let frameIndex = currentFrame + Math.ceil(action.delay * project.project.fps / 1000)

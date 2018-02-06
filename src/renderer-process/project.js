@@ -28,6 +28,7 @@ exports.defaults = {
 	"commands": {
 		"add": {
 			"title": "Add to Stage",
+			"forceWait": false,
 			"fields": {
 				"name": {
 					"title": "Puppet",
@@ -58,6 +59,7 @@ exports.defaults = {
 		},
 		"set": {
 			"title": "Change Puppet",
+			"forceWait": false,
 			"fields": {
 				"target": {
 					"type": "id"
@@ -71,6 +73,7 @@ exports.defaults = {
 		},
 		"remove": {
 			"title": "Remove from Stage",
+			"forceWait": false,
 			"fields": {
 				"target": {
 					"type": "id"
@@ -79,6 +82,7 @@ exports.defaults = {
 		},
 		"move": {
 			"title": "Move to Position",
+			"forceWait": false,
 			"fields": {
 				"target": {
 					"type": "id"
@@ -94,6 +98,7 @@ exports.defaults = {
 		},
 		"facingLeft": {
 			"title": "Change Direction",
+			"forceWait": false,
 			"fields": {
 				"target": {
 					"type": "id"
@@ -107,6 +112,7 @@ exports.defaults = {
 		},
 		"babble": {
 			"title": "Toggle Babbling",
+			"forceWait": false,
 			"fields": {
 				"target": {
 					"type": "id"
@@ -125,6 +131,7 @@ exports.defaults = {
 		},
 		"emote": {
 			"title": "Change Emote",
+			"forceWait": false,
 			"fields": {
 				"target": {
 					"type": "id"
@@ -138,6 +145,7 @@ exports.defaults = {
 		},
 		"jiggle": {
 			"title": "Jiggle Up and Down",
+			"forceWait": false,
 			"fields": {
 				"target": {
 					"type": "id"

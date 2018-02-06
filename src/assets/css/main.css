@@ -85,8 +85,9 @@ select option {
 	color: #000;
 }
 
-button:disabled, select:disabled, input:disabled {
+button:disabled, select:disabled, input:disabled, input:disabled + .checkbox-label {
 	color: #888;
+	cursor: default;
 }
 
 h4 {
@@ -126,7 +127,7 @@ h4 {
 }
 
 .bottom {
-	height: 220px;
+	height: 300px;
 	margin-bottom: 0;
 	width: calc( 100% - 470px );
 	min-width: 234px;
@@ -246,10 +247,6 @@ h4 {
 	box-shadow: 0 313px rgba(256, 0, 0, 0.2) inset;
 }
 
-.selected {
-	background-color: #333c4a;
-}
-
 .fillbutton {
 	width: calc( 100% - 20px );
 	text-align: center;
@@ -293,6 +290,7 @@ h4 {
 	font-family: sans-serif;
 	line-height: 28px;
 	position: relative;
+	width: 100%;
 }
 
 .checkbox + .checkbox-label:before {
@@ -585,7 +583,7 @@ h4 {
     background-color: transparent;
 }
 
-.s8 .scroll {
+.s8.scroll {
     height: 100%;
     position: relative;    
     margin-right: -8px;
@@ -782,7 +780,7 @@ h4 {
 	border-bottom-color: grey;
 }
 
-.action p {
+.action p, .commandEditor p {
 	margin: 0;
 }
 
@@ -794,7 +792,7 @@ h4 {
     box-shadow: inset 0px 0px 4px 4px rgba(1,1,1,.1);
 }
 
-.side .checkbox-label, .side select {
+.side .checkbox-label, .side select, .commandEditor select {
 	margin-bottom: 24px;
 }
 
@@ -972,4 +970,68 @@ input[type="puppet"].place {
 
 body.crosshair, body.crosshair * {
 	cursor: crosshair !important;
+}
+
+.command {
+    padding: 4px;
+    background: #242a33;
+    border: solid 1px grey;
+    margin-bottom: -1px;
+}
+
+.command:hover {
+	background: #2a323d;
+    cursor: pointer;
+}
+
+.command:last-child {
+    margin-bottom: 4px;
+}
+
+.selected {
+	background-color: #333c4a;
+}
+
+.commandEditor {
+	position: relative;
+	padding: 0;
+	padding-left: 8px;
+	height: calc(100% + 8px);
+}
+
+.field {
+	background: rgba(1,1,1,.2);
+    box-shadow: inset 0px 0px 4px 4px rgba(1,1,1,.1);
+    border-radius: 16px;
+    padding: 8px 16px 0px 16px;
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.field .dropdown + label {
+    top: 8px;
+    right: 8px;
+}
+
+.commandEditor .checkbox-label {
+	margin-bottom: 24px;
+}
+
+.optionsList {
+    margin-top: -16px;
+    margin-bottom: 16px;
+}
+
+.option {
+	display: inline-block;
+    font-size: 12pt;
+    background-color: grey;
+    border-radius: 8px;
+    padding: 2px 4px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+.option button {
+	margin: 0;
 }

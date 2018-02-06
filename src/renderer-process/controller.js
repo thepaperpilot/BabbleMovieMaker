@@ -5,6 +5,7 @@ const application = require('./application')
 const inspector = require('./inspector')
 const timeline = require('./timeline')
 const actors = require('./actors')
+const commands = require('./commands')
 
 const remote = require('electron').remote
 const babble = require('babble.js')
@@ -41,6 +42,7 @@ exports.init = function() {
 	inspector.init()
 	timeline.init()
 	actors.init()
+	commands.init()
 
 	// Set up a second renderer for use with the greenscreen
 	opague = PIXI.autoDetectRenderer(1, 1, {transparent: false})
@@ -100,7 +102,7 @@ exports.getThumbnail = function() {
 }
 
 exports.resize = function() {
-	stage.screen.style.height = Math.min(window.innerHeight - 320, (stage.screen.clientWidth * project.project.resolution.split("x")[1] / project.project.resolution.split("x")[0])) + "px"
+	stage.screen.style.height = Math.min(window.innerHeight - 400, (stage.screen.clientWidth * project.project.resolution.split("x")[1] / project.project.resolution.split("x")[0])) + "px"
 	
 	stage.resize(null, project.project.resolution.split("x")[0], project.project.resolution.split("x")[1])
 	stage.renderer.render(stage.stage)
@@ -162,13 +164,6 @@ function readScript() {
         // Parse current line of script
         let action = script[0]
 
-        // Confirm command exists
-        if (!this.actions.hasOwnProperty(action.command)) {
-            // Invalid command, end cutscene
-            if (callback) callback()
-            return
-        }
-
         // Check for actors
         let actor = "id" in action ? action.id : 'target' in action ? action.target : null
         if (actor !== null && !actors.actors.includes(actor))
@@ -178,6 +173,13 @@ function readScript() {
         if (project.project.commands[action.command]) {
 	        if (!timeline.keyframes[frame]) timeline.keyframes[frame] = { actions: [] }
 	        timeline.keyframes[frame].actions.push(action)
+        }
+
+        // Confirm command exists
+        if (!this.actions.hasOwnProperty(action.command)) {
+            // Invalid command, end cutscene
+            if (callback) callback()
+            return
         }
 
         // Run action

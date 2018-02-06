@@ -12,9 +12,10 @@
             <div id="status" class="container status">Loading Interface...</div>
             <div id="bottom" class="container bottom">
                 <div class="buttons s2">
-                    <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label" style="width: 100%;">Green Screen</label>
+                    <input type="checkbox" id="greenscreen" class="checkbox"><label for="greenscreen" class="checkbox-label">Green Screen</label>
                     <button id="settings" class="button-tab">Project Settings</button>
                     <button id="puppets" class="button-tab">Puppet Drawer</button>
+                    <button id="commands" class="button-tab">Edit Commands</button>
                     <button id="export">Export Movie</button>
                 </div>
                 <div id="timeline" class="s8 scroll">
@@ -66,6 +67,29 @@
                 <div id="puppets-panel" class="s8" style="display: none;">
                     <div id="puppetsList" class="fill-horiz-scroll"></div>
                 </div>
+                <div id="commands-panel" class="s8" style="display: none;">
+                    <div id="commandsList" class="buttons s2 scroll" style="border-right-color: #242a33">
+                        <button id="addCommand" style="margin: 0;height: 30px;width: 100%;">Add Command</button>
+                        <br/>
+                    </div>
+                    <div class="s8 commandEditor">
+                        <div id="editor" class="scroll" style="height: calc(100% - 44px)">
+                            <input type="text" id="commandName" placeholder="Command Name (must be unique, can't be blank)">
+                            <p>Description</p>
+                            <input type="text" id="commandDescription">
+                            <input type="checkbox" id="requiresActor" class="checkbox"><label for="requiresActor" class="checkbox-label">Requires Actor</label>
+                            <input type="checkbox" id="forceWait" class="checkbox"><label for="forceWait" class="checkbox-label">Pauses Timeline until Complete</label>
+                            <h4>Fields</h4>
+                            <div id="fieldsList"></div>
+                            <button id="deleteCommand">Delete Command</button>
+                        </div>
+                        <button id="addFieldButton" class="footbutton"><hr/>Add Field</button>
+                        <div id="addFieldPanel" class="footpanel collapsed">
+                            <input type="search" id="fieldSearch" placeholder="Search Fields...">
+                            <div id="addFieldsList" class="scroll" style="height: calc(100% - 31px); padding-right: 0"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="side" class="container side">
@@ -76,7 +100,7 @@
             <button id="addActionButton" class="footbutton"><hr/>Add Action</button>
             <div id="addActionPanel" class="footpanel collapsed">
                 <input type="search" id="actionSearch" placeholder="Search Actions...">
-                <div id="actionsList" class="scroll" style="height: calc(100% - 31px);"></div>
+                <div id="actionsList" class="scroll" style="height: calc(100% - 31px); padding-right: 0"></div>
             </div>
         </div>
         <div id="instructions" style="display: none;">

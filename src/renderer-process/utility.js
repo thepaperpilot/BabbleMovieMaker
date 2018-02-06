@@ -6,3 +6,11 @@ exports.checkParent = function(t, elm) {
   }
   return false;
 }
+
+exports.toggleFolded = function(e) {
+	let classList = e.target.parentNode.classList
+
+	if (classList.contains("folded"))
+		classList.remove("folded")
+	else classList.add("folded")
+}

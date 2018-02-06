@@ -17,6 +17,7 @@ let playing
 let greenscreenCheckbox = document.getElementById("greenscreen")
 let settingsButton = document.getElementById("settings")
 let puppetsButton = document.getElementById("puppets")
+let commandsButton = document.getElementById("commands")
 let exportButton = document.getElementById("export")
 let colorpicker = document.getElementById("colorpicker")
 let fps = document.getElementById("fps")
@@ -26,6 +27,7 @@ let resolution = document.getElementById("resolutions")
 let timelinePanel = document.getElementById("timeline")
 let settingsPanel = document.getElementById("settings-panel")
 let puppetsPanel = document.getElementById("puppets-panel")
+let commandsPanel = document.getElementById("commands-panel")
 
 exports.init = function() {
 	// Window events
@@ -41,6 +43,7 @@ exports.init = function() {
 	greenscreenCheckbox.addEventListener('click', controller.toggleGreenscreen)
 	settingsButton.addEventListener('click', toggleSettings)
 	puppetsButton.addEventListener('click', togglePuppets)
+	commandsButton.addEventListener('click', toggleCommands)
 	exportButton.addEventListener('click', controller.export)
 	colorpicker.addEventListener('change', colorpickerChange)
 	fps.addEventListener('change', fpsChange)
@@ -98,10 +101,12 @@ function toggleSettings() {
 	if (settingsPanel.style.display == 'none') {
 		settingsPanel.style.display = 'block'
 		puppetsPanel.style.display = 'none'
+		commandsPanel.style.display = 'none'
 		timelinePanel.style.display = 'none'
 
 		settingsButton.classList.add('open-tab')
 		puppetsButton.classList.remove('open-tab')
+		commandsButton.classList.remove('open-tab')
 	} else {
 		settingsPanel.style.display = 'none'
 		timelinePanel.style.display = 'block'
@@ -114,15 +119,35 @@ function togglePuppets() {
 	if (puppetsPanel.style.display == 'none') {
 		settingsPanel.style.display = 'none'
 		puppetsPanel.style.display = 'block'
+		commandsPanel.style.display = 'none'
 		timelinePanel.style.display = 'none'
 
 		settingsButton.classList.remove('open-tab')
 		puppetsButton.classList.add('open-tab')
+		commandsButton.classList.remove('open-tab')
 	} else {
 		puppetsPanel.style.display = 'none'
 		timelinePanel.style.display = 'block'
 
 		puppetsButton.classList.remove('open-tab')
+	}
+}
+
+function toggleCommands() {
+	if (commandsPanel.style.display == 'none') {
+		settingsPanel.style.display = 'none'
+		puppetsPanel.style.display = 'none'
+		commandsPanel.style.display = 'block'
+		timelinePanel.style.display = 'none'
+
+		settingsButton.classList.remove('open-tab')
+		puppetsButton.classList.remove('open-tab')
+		commandsButton.classList.add('open-tab')
+	} else {
+		commandsPanel.style.display = 'none'
+		timelinePanel.style.display = 'block'
+
+		commandsButton.classList.remove('open-tab')
 	}
 }
 
