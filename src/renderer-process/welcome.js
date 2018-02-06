@@ -40,7 +40,7 @@ document.getElementById('create').addEventListener('submit', function(e) {
 
 	// Create project
 	fs.writeJsonSync(dest, {
-		babble: babble
+		babble: path.join("..", path.basename(babble))
 	})
 
 	// Open new project

@@ -244,7 +244,7 @@ exports.checkChanges = function() {
 }
 
 exports.updateBabble = function(reload = true) {
-	let babble = fs.readJsonSync(this.project.babble)
+	let babble = fs.readJsonSync(path.join(remote.getGlobal('project').filepath, this.project.babble))
 
 	// Detect puppet name changes, and automatically update the script accordingly
 	let keys = Object.keys(this.project.actors)
@@ -283,7 +283,7 @@ exports.updateBabble = function(reload = true) {
 
 function reloadBabble() {
 	let filepath = remote.getGlobal('project').filepath
-	let babble = fs.readJsonSync(exports.project.babble)
+	let babble = fs.readJsonSync(path.join(filepath, exports.project.babble))
 
 	// Reload assets and puppets
 	exports.assets = fs.readJsonSync(path.join(filepath, '..', 'assets', 'assets.json'))
