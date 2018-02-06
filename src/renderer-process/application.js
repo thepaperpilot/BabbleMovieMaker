@@ -6,6 +6,7 @@
 const project = require('./project')
 const controller = require('./controller')
 const timeline = require('./timeline')
+const inspector = require('./inspector')
 
 const electron = require('electron')
 const modal = new (require('vanilla-modal').default)()
@@ -212,6 +213,7 @@ function puppetscaleChange(e) {
 function numslotsChange(e) {
 	project.project.numCharacters = parseInt(e.target.value)
 	controller.resize()
+	inspector.update()
 }
 
 function resolutionChange(e) {
