@@ -342,7 +342,6 @@ function openCutscene(e) {
 		domSelectedCutscenes[0].classList.remove("selected")
 	e.target.classList.add("selected")
 	cutscene = e.target.name
-	console.log(cutscene)
 
 	domCutsceneName.value = cutscene
 	deleteCutsceneButton.disabled = Object.keys(project.scripts).length === 1
