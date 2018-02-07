@@ -1041,6 +1041,7 @@ body.crosshair, body.crosshair * {
 	width: 100%;
 	padding-bottom: 4px;
 	margin-top: 8px;
+    margin-bottom: 24px;
 }
 
 textarea, .textarea-size {
