@@ -324,18 +324,20 @@ function updateTimeline(reset) {
 	inspector.update(reset ? -1 : null)
 
 	// Calculate where the current frame is on the timeline
-	let timelineRect = timescroll.getBoundingClientRect()
-    let rect = currentFrame.getBoundingClientRect()
-    let width = timelineRect.right - timelineRect.left - scrollPadding
+	requestAnimationFrame(() => {
+		let timelineRect = timescroll.getBoundingClientRect()
+	    let rect = currentFrame.getBoundingClientRect()
+	    let width = timelineRect.right - timelineRect.left - scrollPadding
 
-    // Scroll timeline to currentFrame if necessary
-    if (rect.left < timelineRect.left) {
-    	// We need to scroll left
-    	timescroll.scrollLeft -= timelineRect.left - rect.left + width
-    } else if (rect.right > timescroll.clientWidth + timelineRect.left) {
-    	// We need to scroll right
-    	timescroll.scrollLeft += rect.right - (timescroll.clientWidth + timelineRect.left) + width
-    }
+	    // Scroll timeline to currentFrame if necessary
+	    if (rect.left < timelineRect.left) {
+	    	// We need to scroll left
+	    	timescroll.scrollLeft -= timelineRect.left - rect.left + width
+	    } else if (rect.right > timescroll.clientWidth + timelineRect.left) {
+	    	// We need to scroll right
+	    	timescroll.scrollLeft += rect.right - (timescroll.clientWidth + timelineRect.left) + width
+	    }
+	})
 }
 
 function addFrames(oldFrames, newFrames) {
