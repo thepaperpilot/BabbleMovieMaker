@@ -130,12 +130,7 @@ function toggleSettings() {
 		puppetsButton.classList.remove('open-tab')
 		cutscenesButton.classList.remove('open-tab')
 		commandsButton.classList.remove('open-tab')
-	} else {
-		settingsPanel.style.display = 'none'
-		timelinePanel.style.display = 'block'
-
-		settingsButton.classList.remove('open-tab')
-	}
+	} else exports.closePanels()
 }
 
 function togglePuppets() {
@@ -150,12 +145,7 @@ function togglePuppets() {
 		puppetsButton.classList.add('open-tab')
 		cutscenesButton.classList.remove('open-tab')
 		commandsButton.classList.remove('open-tab')
-	} else {
-		puppetsPanel.style.display = 'none'
-		timelinePanel.style.display = 'block'
-
-		puppetsButton.classList.remove('open-tab')
-	}
+	} else exports.closePanels()
 }
 
 function toggleCommands() {
@@ -170,12 +160,7 @@ function toggleCommands() {
 		puppetsButton.classList.remove('open-tab')
 		cutscenesButton.classList.remove('open-tab')
 		commandsButton.classList.add('open-tab')
-	} else {
-		commandsPanel.style.display = 'none'
-		timelinePanel.style.display = 'block'
-
-		commandsButton.classList.remove('open-tab')
-	}
+	} else exports.closePanels()
 }
 
 function toggleCutscenes() {
@@ -190,12 +175,7 @@ function toggleCutscenes() {
 		puppetsButton.classList.remove('open-tab')
 		cutscenesButton.classList.add('open-tab')
 		commandsButton.classList.remove('open-tab')
-	} else {
-		cutscenesPanel.style.display = 'none'
-		timelinePanel.style.display = 'block'
-
-		cutscenesButton.classList.remove('open-tab')
-	}
+	} else exports.closePanels()
 }
 
 function colorpickerChange(e) {

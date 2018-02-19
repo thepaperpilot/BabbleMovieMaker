@@ -47,6 +47,7 @@ exports.reset = function(hard = false) {
 		while (timescroll.children[1])
 			timescroll.removeChild(timescroll.children[1])
 		actors.reset()
+		exports.frame = 0
 	}
 }
 
