@@ -465,10 +465,10 @@ function addAction(e) {
 	if (!keyframe) {
 		keyframe = timeline.keyframes[timeline.frame] = { actions: [] }
 		document.getElementById("frame " + timeline.frame).classList.add("keyframe")
-		let actor = "id" in action ? action.id : 'target' in action ? action.target : null
-		if (actor !== null)
-			document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + timeline.frame).classList.add("keyframe")
 	}
+	let actor = "id" in action ? action.id : 'target' in action ? action.target : null
+	if (actor !== null)
+		document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + timeline.frame).classList.add("keyframe")
     keyframe.actions.push(action)
 
     timeline.simulateFromFrame()
