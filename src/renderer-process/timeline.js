@@ -181,6 +181,10 @@ exports.simulateFromFrame = function(frame) {
 					id = "actor " + actors.actors.indexOf(action.id) + " " + id
 				else if ('target' in action)
 					id = "actor " + actors.actors.indexOf(action.target) + " " + id
+				if (frameIndex > oldFrames + exports.bufferFrames) {
+					addFrames(oldFrames,  frameIndex)
+					oldFrames = frameIndex
+				}
 				let frameElement = document.getElementById(id)
 
 				if (!frameElement.finishedActions) {
@@ -205,34 +209,7 @@ exports.simulateFromFrame = function(frame) {
 	}
 
 	if (oldFrames < exports.frames) {
-		let node = document.body.getElementsByClassName("lastFrame")[0]
-		while (node) {
-			node.classList.remove("lastFrame")
-			node = document.body.getElementsByClassName("lastFrame")[0]
-		}
-		for (let i = oldFrames + exports.bufferFrames; i < exports.frames + exports.bufferFrames; i++) {
-			let domFrame = document.createElement("div")
-			domFrame.id = "frame " + i
-			domFrame.classList.add("frame")
-			domFrame.frame = i
-			domFrame.addEventListener("click", exports.gotoFrame)
-			domFrames.appendChild(domFrame)
-			if (exports.keyframes[i])
-				domFrame.classList.add("keyframe")
-			if (i == exports.frames)
-				domFrame.classList.add("lastFrame")
-		}
-		for (let i = 0; i < actors.actors.length; i++) {
-			for (let j = oldFrames + exports.bufferFrames; j < exports.frames + exports.bufferFrames; j++) {
-				actors.addFrame(i, j)
-			}
-		}
-		if (oldFrames + exports.bufferFrames > exports.frames) {
-			document.getElementById("frame " + exports.frames).classList.add("lastFrame")
-			for (let i = 0; i < actors.actors.length; i++) {
-				document.getElementById("actor " + i + " frame " + exports.frames).classList.add("lastFrame")
-			}
-		}
+		addFrames(oldFrames, exports.frames)
 	} else if (oldFrames > exports.frames) {
 		let node = document.body.getElementsByClassName("lastFrame")[0]
 		while (node) {
@@ -358,4 +335,35 @@ function updateTimeline(reset) {
     	// We need to scroll right
     	timescroll.scrollLeft += rect.right - (timescroll.clientWidth + timelineRect.left) + width
     }
+}
+
+function addFrames(oldFrames, newFrames) {
+	let node = document.body.getElementsByClassName("lastFrame")[0]
+	while (node) {
+		node.classList.remove("lastFrame")
+		node = document.body.getElementsByClassName("lastFrame")[0]
+	}
+	for (let i = oldFrames + exports.bufferFrames; i < newFrames + exports.bufferFrames; i++) {
+		let domFrame = document.createElement("div")
+		domFrame.id = "frame " + i
+		domFrame.classList.add("frame")
+		domFrame.frame = i
+		domFrame.addEventListener("click", exports.gotoFrame)
+		domFrames.appendChild(domFrame)
+		if (exports.keyframes[i])
+			domFrame.classList.add("keyframe")
+		if (i == newFrames)
+			domFrame.classList.add("lastFrame")
+	}
+	for (let i = 0; i < actors.actors.length; i++) {
+		for (let j = oldFrames + exports.bufferFrames; j < newFrames + exports.bufferFrames; j++) {
+			actors.addFrame(i, j)
+		}
+	}
+	if (oldFrames + exports.bufferFrames > newFrames) {
+		document.getElementById("frame " + newFrames).classList.add("lastFrame")
+		for (let i = 0; i < actors.actors.length; i++) {
+			document.getElementById("actor " + i + " frame " + newFrames).classList.add("lastFrame")
+		}
+	}
 }
