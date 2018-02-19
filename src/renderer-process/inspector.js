@@ -1,6 +1,7 @@
 //Imports
 const project = require('./project')
-let controller = require('./controller')
+const application = require('./application')
+const controller = require('./controller')
 const timeline = require('./timeline')
 const actors = require('./actors')
 const utility = require('./utility')
@@ -437,6 +438,7 @@ function dropPuppet(e) {
             puppet.style.zIndex = ''
     		document.body.classList.remove("crosshair")
             puppet = null
+            application.closePanels()
 		} else puppet.clicked = true
 	}
 }
