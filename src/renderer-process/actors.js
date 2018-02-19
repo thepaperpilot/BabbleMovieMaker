@@ -93,6 +93,7 @@ exports.addFrame = function(actor, frame) {
 exports.reset = function() {
 	domActors.innerHTML = ''
 	exports.actors = []
+	inspector.target = -1
 }
 
 function selectActor(e) {

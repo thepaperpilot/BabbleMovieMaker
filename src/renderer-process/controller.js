@@ -154,21 +154,20 @@ function start() {
 exports.readScript = function() {
 	stage.clearPuppets()
 	timeline.reset(true)
+	let timer = {}
 	let frame = 0
-	let cutscene = new babble.Cutscene(stage, project.scripts[exports.script], project.puppets, () => { if (timeline.frames === null || frame > timeline.frames) timeline.frames = frame })
+	let cutscene = new babble.Cutscene(stage, project.scripts[exports.script], project.puppets, () => { if (timeline.frames === null || frame > timeline.frames + 1) timeline.frames = frame + 1})
 	cutscene.actions.delay = function(callback, action) {
-		// Normal delay behavior
         if (action.delay <= 0) requestAnimationFrame(callback)
         else {
-            let timer = PIXI.timerManager.createTimer(action.delay)
-            timer.on('end', callback)
-            timer.start()
-        }
+			// PIXI.timer was having too many problems
+			if (action.parent) action.parent.delay = action.delay
+			let endFrame = parseInt(frame) + Math.floor(action.delay * project.project.fps / 1000)
+			if (frame == endFrame) endFrame++
+			if (timeline.frames === null || endFrame > timeline.frames) timeline.frames = endFrame
 
-        // Find out when actions end
-        if (action.parent) action.parent.delay = action.delay
-    	let endFrame = parseInt(frame) + Math.ceil(action.delay * project.project.fps / 1000)
-    	if (timeline.frames === null || endFrame > timeline.frames) timeline.frames = endFrame
+			timer[endFrame] = callback
+        }
     }
 	cutscene.parseNextAction = function(script, callback) {
         // Check if script is complete
@@ -238,6 +237,7 @@ exports.readScript = function() {
 
 		frame++
 		stage.update(1000 / project.project.fps)
+		if (timer[frame]) timer[frame]()
 	}
 
 	for (let i = 0; i < timeline.frames + timeline.bufferFrames; i++) {
@@ -288,6 +288,7 @@ exports.readScript = function() {
 		}
 	}
 
+	project.scripts[exports.script] = timeline.generateScript()
 	project.updateBabble(false)
 	timeline.gotoFrame(0)
 }

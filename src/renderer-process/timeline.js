@@ -257,28 +257,14 @@ exports.generateScript = function() {
 			})
 		}
 		let keyframe = exports.keyframes[keys[i]]
-		let customActions = []
 		for (let j = 0; j < keyframe.actions.length; j++) {
 			let action = JSON.parse(JSON.stringify(keyframe.actions[j]))
 			delete action.error
 			delete action.delay
-			// TODO add custom actions to array
-			// and continue
-			delete action.wait
+			if (Object.keys(project.defaults.commands).indexOf(action.command) == -1 && project.project.commands[action.command].forceWait)
+				action.wait = true
+			else delete action.wait
 			script.push(action)
-		}
-		if (customActions.length > 0) {
-			let action = {
-				command: "run",
-				script: [],
-				wait: true
-			}
-			for (let j = 0; j < customActions.length; j++) {
-				customActions[j].wait = true
-				action.script.push(customActions[j])
-			}
-			script.push(action)
-			script = action.script
 		}
 	}
 	if(script.length > 0) script[script.length - 1].wait = true

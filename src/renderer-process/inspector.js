@@ -359,7 +359,6 @@ exports.removeAction = function(e) {
 	let frame = e.target && e.target.frame != null ? e.target.frame : timeline.frame // jshint ignore: line
 	let keyframe = timeline.keyframes[frame]
 
-	console.log(action)
 	if (action.delay) {
 		let frameIndex = frame + Math.ceil(action.delay * project.project.fps / 1000)
 		let id = "frame " + frameIndex
