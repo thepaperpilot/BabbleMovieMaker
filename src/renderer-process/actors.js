@@ -109,6 +109,7 @@ function newActor() {
 	exports.actors.push(name)
 
 	exports.addActor(exports.actors.length - 1)
+	document.getElementById("actor " + (exports.actors.length - 1) + " frame " + timeline.frame).click()
 }
 
 function renameActor(e) {
