@@ -194,8 +194,8 @@ exports.readScript = function() {
 
         // Confirm command exists
         if (!this.actions.hasOwnProperty(action.command)) {
-            // Invalid command, end cutscene
-            if (callback) callback()
+            // Invalid command, skip it
+            this.parseNextAction(script.slice(1), callback)
             return
         }
 
