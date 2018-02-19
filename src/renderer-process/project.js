@@ -251,7 +251,13 @@ exports.updateBabble = function(reload = true) {
 	let renamedField = false
 	for (let i = 0; i < keys.length; i++) {
 		let oldName = this.project.actors[keys[i]]
-		let newName = babble.characters.filter(char => char.id == keys[i])[0].name // jshint ignore: line
+		let puppet = babble.characters.filter(char => char.id == keys[i])[0] // jshint ignore: line
+		if (!puppet) {
+			// Remove this puppet, it no longer exists
+			delete this.project.actors[keys[i]]
+			continue
+		}
+		let newName = puppet.name
 		if (oldName !== newName) {
 			this.project.actors[keys[i]] = newName
 			let keyframes = Object.keys(timeline.keyframes)
