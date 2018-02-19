@@ -40,7 +40,11 @@ exports.init = function() {
 	window.addEventListener("resize", controller.resize)
 
 	// Electron window events
-	electron.remote.getCurrentWindow().on('focus', () => { project.updateBabble() })
+	let onFocus = () => { project.updateBabble() }
+	electron.remote.getCurrentWindow().on('focus', onFocus)
+	window.addEventListener('beforeunload', () => {
+	  electron.remote.getCurrentWindow().removeListener('focus', onFocus)
+	})
 
 	// DOM listeners
 	greenscreenCheckbox.addEventListener('click', controller.toggleGreenscreen)
