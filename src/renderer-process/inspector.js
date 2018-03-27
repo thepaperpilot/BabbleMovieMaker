@@ -27,25 +27,30 @@ var commandFields = {
 		let wrapper = document.createElement("div")
 		wrapper.classList.add("textarea-container")
 		
-		let textbox = document.createElement("textarea")
+		let textbox = document.createElement(field.textarea ? "textarea" : "input")
 		textbox.style.display = 'block'
 		textbox.frame = frame
 		textbox.action = action
 		textbox.key = key
 		textbox.value = action[key]
 		textbox.addEventListener("change", editText)
-		textbox.addEventListener("input", resizeTextbox)
+		if (field.textarea) textbox.addEventListener("input", resizeTextbox)
+		else textbox.type = "text"
 
 		let sizedTextbox = document.createElement("div")
 		sizedTextbox.classList.add("textarea-size")
-		textbox.sizedTextbox = sizedTextbox
+		if (field.textarea) textbox.sizedTextbox = sizedTextbox
 		
-		wrapper.appendChild(textbox)
-		wrapper.appendChild(sizedTextbox)
 		parent.appendChild(titleElement)
-		parent.appendChild(wrapper)
+		if (field.textarea) {
+			wrapper.appendChild(textbox)
+			wrapper.appendChild(sizedTextbox)
+			parent.appendChild(wrapper)
 
-		resizeTextbox({target: textbox})
+			resizeTextbox({target: textbox})
+		} else {
+			parent.appendChild(textbox)
+		}
 	},
 	puppet: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")

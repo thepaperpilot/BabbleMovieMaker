@@ -211,6 +211,7 @@ function addNewField(e) {
 	switch (e.target.fieldType) {
 		case "text": case "puppet": case "select":
 			field.default = ""
+			field.textarea = false
 			break
 		case "slider":
 			field.min = 1
@@ -311,8 +312,22 @@ function addField(fieldName, addToDom = true) {
 			domFieldDefault.value = field.default
 			domFieldDefault.addEventListener("change", editText)
 			domFieldDefault.disabled = disabled
+			let domFieldTextarea = document.createElement("input")
+			domFieldTextarea.id = "checkbox label " + domFields.children.length
+			domFieldTextarea.type = "checkbox"
+			domFieldTextarea.classList.add("checkbox")
+			domFieldTextarea.key = "textarea"
+			domFieldTextarea.value = field.textarea
+			domFieldTextarea.addEventListener("change", editCheck)
+			domFieldTextarea.disabled = disabled
+			let domFieldTextareaLabel = document.createElement("label")
+			domFieldTextareaLabel.classList.add("checkbox-label")
+			domFieldTextareaLabel.setAttribute("for", "checkbox label " + domFields.children.length)
+			domFieldTextareaLabel.innerText = "Text Area"
 			domField.appendChild(domFieldDefaultTitle)
 			domField.appendChild(domFieldDefault)
+			domField.appendChild(domFieldTextarea)
+			domField.appendChild(domFieldTextareaLabel)
 			break
 		case "slider":
 			let domFieldMinTitle = document.createElement("p")
