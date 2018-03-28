@@ -167,10 +167,12 @@ function removeActor(e) {
 						id = "actor " + exports.actors.indexOf(action.target) + " " + id
 					let frameElement = document.getElementById(id)
 
-					frameElement.finishedActions.splice(frameElement.finishedActions.indexOf(action), 1)
+					if (frameElement && frameElement.finishedActions) {
+						frameElement.finishedActions.splice(frameElement.finishedActions.indexOf(action), 1)
 
-					if (frameElement.finishedActions.length === 0) {
-						frameElement.classList.remove("endDelay")
+						if (frameElement.finishedActions.length === 0) {
+							frameElement.classList.remove("endDelay")
+						}
 					}
 					action.delay = null
 				}
