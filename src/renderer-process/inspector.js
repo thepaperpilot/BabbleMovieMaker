@@ -426,8 +426,9 @@ exports.removeAction = function(e) {
 		}
 		if (!hasKeyframe && actors.actors.includes(actor)) document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + timeline.frame).classList.remove("keyframe")
 	}
-	if (keyframe.actions.length === 0) {
+	if (keyframe.actions.length === 0)
 		delete timeline.keyframes[timeline.frame]
+	if (keyframe.actions.filter(action => !("id" in action || "target" in action)).length === 0) {
 		document.getElementById("frame " + timeline.frame).classList.remove("keyframe")
 	}
 	
@@ -498,11 +499,11 @@ function addAction(e) {
 		let field = project.project.commands[command].fields[fields[i]]
 		action[fields[i]] = fields[i] === "id" || fields[i] === "target" ? actors.actors[exports.target] : field.default
 	}
+	let actor = "id" in action ? action.id : 'target' in action ? action.target : null
 	if (!keyframe) {
 		keyframe = timeline.keyframes[timeline.frame] = { actions: [] }
-		document.getElementById("frame " + timeline.frame).classList.add("keyframe")
+		if (actor === null) document.getElementById("frame " + timeline.frame).classList.add("keyframe")
 	}
-	let actor = "id" in action ? action.id : 'target' in action ? action.target : null
 	if (actor !== null)
 		document.getElementById("actor " + actors.actors.indexOf(actor) + " frame " + timeline.frame).classList.add("keyframe")
     keyframe.actions.push(action)

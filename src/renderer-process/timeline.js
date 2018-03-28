@@ -367,7 +367,7 @@ function addFrames(oldFrames, newFrames) {
 		domFrame.frame = i
 		domFrame.addEventListener("click", exports.gotoFrame)
 		domFrames.appendChild(domFrame)
-		if (exports.keyframes[i])
+		if (exports.keyframes[i] && exports.keyframes[i].actions.filter(action => !("id" in action || 'target' in action)).length > 0)
 			domFrame.classList.add("keyframe")
 		if (i == newFrames)
 			domFrame.classList.add("lastFrame")
@@ -409,12 +409,11 @@ function paste() {
 		actions = JSON.parse(electron.clipboard.readText())
 
 		for (let action in actions) {
-			console.log(JSON.stringify(actions[action]))
+	        let actor = "id" in actions[action] ? actions[action].id : 'target' in actions[action] ? actions[action].target : null
 	        if (!keyframes[exports.frame]) {
 	        	keyframes[exports.frame] = { actions: [] }
-				document.getElementById("frame " + exports.frame).classList.add("keyframe")
+				if (actor === null) document.getElementById("frame " + exports.frame).classList.add("keyframe")
 	        }
-	        let actor = "id" in actions[action] ? actions[action].id : 'target' in actions[action] ? actions[action].target : null
 	        if ((actors.actors.indexOf(actor) === -1) != (inspector.target === -1)) continue
 			if (actor !== null) {
 				actions[action]["id" in actions[action] ? "id" : "target"] = actors.actors[inspector.target]
@@ -437,7 +436,6 @@ function deleteKey() {
 }
 
 function recordChange() {
-	console.error(reverseHistory)
 	reverseHistory = []
 	let step = JSON.stringify(keyframes)
 	history.push(step)
@@ -447,16 +445,13 @@ function recordChange() {
 function undo() {
 	if (history.length === 0) return
 	reverseHistory.push(history.pop())
-	console.log(reverseHistory)
 	let step = history.length === 0 ? oldKeyframes : history[history.length - 1]
-	console.log(step)
 	exports.keyframes = keyframes = JSON.parse(step)
 	readScript()
 	updateTitle(step)
 }
 
 function redo() {
-	console.log(reverseHistory)
 	if (reverseHistory.length === 0) return
 	let step = reverseHistory.pop()
 	history.push(step)

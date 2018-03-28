@@ -260,7 +260,7 @@ exports.readScript = function() {
 		domFrame.frame = i
 		domFrame.addEventListener("click", timeline.gotoFrame)
 		domFrames.appendChild(domFrame)
-		if (timeline.keyframes[i])
+		if (timeline.keyframes[i] && timeline.keyframes[i].actions.filter(action => !("id" in action || 'target' in action)).length > 0)
 			domFrame.classList.add("keyframe")
 		if (i == timeline.frames)
 			domFrame.classList.add("lastFrame")

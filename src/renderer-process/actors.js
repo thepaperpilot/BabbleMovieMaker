@@ -158,10 +158,6 @@ function removeActor(e) {
 		for (let j = 0; j < keyframe.actions.length; j++) {
 			if (keyframe.actions[j].target == id || keyframe.actions[j].id == id) {
 				keyframe.actions.splice(j, 1)
-				if (keyframe.actions.length === 0) {
-					delete timeline.keyframes[keyframes[i]]
-					document.getElementById("frame " + keyframes[i]).classList.remove("keyframe")
-				}
 				j--
 			}
 		}
