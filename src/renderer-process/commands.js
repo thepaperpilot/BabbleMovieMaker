@@ -104,7 +104,6 @@ function openCommand(e) {
 	domForceWait.checked = command.forceWait
 	domForceWait.disabled = disabled
 	deleteCommandButton.disabled = disabled
-	addFieldButton.disabled = disabled
 
 	domFields.innerHTML = ''
 	dropdowns = []
@@ -238,7 +237,7 @@ function addNewField(e) {
 
 function addField(fieldName, addToDom = true) {
 	let field = command.fields[fieldName]
-	let disabled = name in project.defaults.commands
+	let disabled = name in project.defaults.commands && fieldName in project.defaults.commands[name].fields
 
 	let domField = document.createElement("div")
 	domField.classList.add("field")
