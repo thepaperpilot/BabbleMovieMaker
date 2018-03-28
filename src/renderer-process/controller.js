@@ -11,6 +11,7 @@ const remote = require('electron').remote
 const babble = require('babble.js')
 const Gif = require('./../lib/gif.js')
 const fs = require('fs-extra')
+const path = require('path')
 
 // Constants
 const puppetKeys = ["id", "name", "babbling", "position", "target", "emote", "facingLeft", "movingAnim", "eyesAnim", "mouthAnim", "deadbonesAnim", "eyesDuration", "mouthDuration", "deadbonesDuration", "deadbonesTargetY", "deadbonesStartY", "deadbonesTargetRotation", "deadbonesStartRotation"]
@@ -21,6 +22,7 @@ let rendering = 0
 let opague
 let transparent
 let cutscene
+let uploadedTextures = 0
 
 // DOM Elements
 let screenDom = document.getElementById('screen')
@@ -148,8 +150,18 @@ function start() {
 		openCutscene({target: domCutscenes.children[2]})
 		exports.readScript()
 		timeline.clearHistory()
+		// start pre-uploading textures to GPU
+		setTimeout(uploadTexture, 1000)
 		// Protection against start being called before stage constructor returns, like it'll do in the event of there being no assets to load
 	} else requestAnimationFrame(start)
+}
+
+function uploadTexture() {
+	stage.renderer.plugins.prepare.upload(PIXI.utils.BaseTextureCache[path.join(project.assetsPath, project.assets[Object.keys(project.assets)[uploadedTextures]].location)])
+	uploadedTextures++
+	if (project.assets[Object.keys(project.assets)[uploadedTextures]]) {
+		setTimeout(uploadTexture, 10)
+	}
 }
 
 exports.readScript = function() {
