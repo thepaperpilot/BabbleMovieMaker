@@ -25,6 +25,9 @@ exports.defaults = {
 	"fps": 60,
 	"resolution": "1280x720",
 	"actors": {},
+	"scripts": "../scripts.json",
+	"puppets": "../puppets.json",
+	"assets": "../assets",
 	"commands": {
 		"add": {
 			"title": "Add to Stage",
@@ -168,10 +171,10 @@ exports.readProject = function() {
 		status.init()
 		status.log('Loading project...', 1, 1)
 
-		this.assetsPath = path.join(filepath, '..', 'assets')
 		this.project = Object.assign({}, this.defaults)
 		Object.assign(this.project, proj)
-		this.scripts = fs.existsSync(path.join(filepath, '..', 'scripts.json')) ? fs.readJsonSync(path.join(filepath, '..', 'scripts.json')) : { "My Cutscene": [] }
+		this.assetsPath = path.join(filepath, this.project.assets)
+		this.scripts = fs.existsSync(path.join(filepath, this.project.scripts)) ? fs.readJsonSync(path.join(filepath, this.project.scripts)) : { "My Cutscene": [] }
 		reloadBabble()
 
 		this.oldProject = JSON.stringify(proj)
@@ -189,8 +192,8 @@ exports.readProject = function() {
 
 exports.saveProject = function() {
 	fs.writeFile(settings.settings.openProject, JSON.stringify(this.project, null, 4))
-	fs.writeFile(path.join(settings.settings.openProject, '..', 'puppets.json'), JSON.stringify(this.puppets, null, 4))
-	fs.writeFile(path.join(settings.settings.openProject, '..', 'scripts.json'), JSON.stringify(this.scripts, null, 4))
+	fs.writeFile(path.join(settings.settings.openProject, this.project.puppets), JSON.stringify(this.puppets, null, 4))
+	fs.writeFile(path.join(settings.settings.openProject, this.project.scripts), JSON.stringify(this.scripts, null, 4))
 	settings.addRecentProject(controller.getThumbnail())
 	this.oldProject = JSON.stringify(this.project)
 	this.oldScripts = JSON.stringify(this.scripts)
@@ -297,7 +300,7 @@ function reloadBabble() {
 	let babble = fs.readJsonSync(path.join(filepath, exports.project.babble))
 
 	// Reload assets and puppets
-	exports.assets = fs.readJsonSync(path.join(filepath, '..', 'assets', 'assets.json'))
+	exports.assets = fs.readJsonSync(path.join(filepath, exports.project.assets, 'assets.json'))
 	// Why does jshint not like me using == to compare with null, to get both null and undefined, but not 0 or []  or {}?
 	if (exports.puppets == null) exports.puppets = {} // jshint ignore: line
 	// Clear our puppets without dereferencing the object
