@@ -243,6 +243,11 @@ exports.checkChanges = function() {
 	return true
 }
 
+exports.getProjectName = function() {
+	let filepath = path.basename(remote.getGlobal('project').filepath)
+	return filepath.substr(0, filepath.lastIndexOf('.'))
+}
+
 exports.updateBabble = function(reload = true) {
 	let babble = fs.readJsonSync(path.join(remote.getGlobal('project').filepath, this.project.babble))
 

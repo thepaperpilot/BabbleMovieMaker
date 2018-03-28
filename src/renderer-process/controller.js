@@ -147,6 +147,7 @@ function start() {
 		}
 		openCutscene({target: domCutscenes.children[2]})
 		exports.readScript()
+		timeline.clearHistory()
 		// Protection against start being called before stage constructor returns, like it'll do in the event of there being no assets to load
 	} else requestAnimationFrame(start)
 }
@@ -288,7 +289,7 @@ exports.readScript = function() {
 		}
 	}
 
-	project.scripts[exports.script] = timeline.generateScript()
+	project.scripts[exports.script] = timeline.generateScript(true)
 	project.updateBabble(false)
 	timeline.gotoFrame(0)
 }
@@ -365,6 +366,7 @@ function readCutscene() {
 	exports.script = cutscene
 	exports.readScript()
 	application.closePanels()
+	timeline.clearHistory()
 }
 
 function deleteCutscene() {

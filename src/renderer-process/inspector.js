@@ -6,6 +6,8 @@ const timeline = require('./timeline')
 const actors = require('./actors')
 const utility = require('./utility')
 
+const electron = require('electron')
+
 // Vars
 let dropdowns = []
 let puppet 		// Used  for dragging puppets from puppet drawer
@@ -388,7 +390,6 @@ exports.updateAddActionPanel = function(needsActor) {
 	}
 }
 
-// Returns true if keyframe was made empty and deleted
 exports.removeAction = function(e) {
 	let action = e.target && e.target.parentNode ? e.target.parentNode.action : e
 	let frame = e.target && e.target.frame != null ? e.target.frame : timeline.frame // jshint ignore: line
@@ -532,6 +533,14 @@ function addTitle(parent, action, i) {
 	dropdown.classList.add("dropdown-content")
 	dropdown.classList.add("collapsed")
 	dropdown.action = action
+	let cut = document.createElement("li")
+	cut.innerText = "Cut Action"
+	cut.addEventListener("click", cutAction)
+	dropdown.appendChild(cut)
+	let copy = document.createElement("li")
+	copy.innerText = "Copy Action"
+	copy.addEventListener("click", copyAction)
+	dropdown.appendChild(copy)
 	let remove = document.createElement("li")
 	remove.innerText = "Remove Action"
 	remove.addEventListener("click", exports.removeAction)
@@ -647,4 +656,14 @@ function searchCommands(e) {
 
 function resizeTextbox(e) {
 	e.target.sizedTextbox.innerText = e.target.value + "\n"
+}
+
+function cutAction (e) {
+	copyAction(e)
+	exports.removeAction(e)
+}
+
+function copyAction(e) {
+	let action = e.target.parentNode.action
+	electron.clipboard.writeText(JSON.stringify([action]))
 }

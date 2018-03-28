@@ -5,6 +5,8 @@ const actors = require('./actors')
 const inspector = require('./inspector')
 
 const babble = require('babble.js')
+const electron = require('electron')
+const path = require('path')
 
 // Constants
 const bufferFrames = 100	// How many frames to extend the timeline after the last action is completed
@@ -14,6 +16,9 @@ const scrollPadding = 50	// When current frame loses visibility, how far it plac
 let psuedoCutscene
 let keyframes
 let currentFrame = null // used when resimulating
+let history = []
+let reverseHistory = []
+let oldKeyframes
 
 // DOM Elements
 let timescroll = document.getElementById("time-scroll")
@@ -36,6 +41,23 @@ exports.init = function() {
 	    	if (endFrame > exports.frames) exports.frames = endFrame
 		}
 	}
+
+	// Receive messages from application menu
+	electron.ipcRenderer.on('cut', cut)
+	electron.ipcRenderer.on('copy', copy)
+	electron.ipcRenderer.on('paste', paste)
+	electron.ipcRenderer.on('delete', deleteKey)
+	electron.ipcRenderer.on('undo', undo)
+	electron.ipcRenderer.on('redo', redo)
+}
+
+// Fix for accelerators not working for some key combos
+exports.keyDown = function(e) {
+	let key = e.keyCode ? e.keyCode : e.which
+
+	if (key == 67 && e.ctrlKey) copy();
+	else if (key == 86 && e.ctrlKey) paste();
+	else if (key == 88 && e.ctrlKey) cut();
 }
 
 exports.reset = function(hard = false) {
@@ -242,9 +264,10 @@ exports.resimulate = function() {
 	inspector.update()
 }
 
-exports.generateScript = function() {
+exports.generateScript = function(preserveHistory = false) {
 	if (!exports.keyframes) return null
 
+	if (!preserveHistory) recordChange()
 	let keys = Object.keys(exports.keyframes)
 	let cutscene = []
 	let script = cutscene
@@ -269,6 +292,11 @@ exports.generateScript = function() {
 	}
 	if(script.length > 0) script[script.length - 1].wait = true
 	return cutscene
+}
+
+exports.clearHistory = function() {
+	oldKeyframes = JSON.stringify(exports.keyframes)
+	history = reverseHistory = []
 }
 
 function updatePuppet(puppet) {
@@ -354,5 +382,102 @@ function addFrames(oldFrames, newFrames) {
 		for (let i = 0; i < actors.actors.length; i++) {
 			document.getElementById("actor " + i + " frame " + newFrames).classList.add("lastFrame")
 		}
+	}
+}
+
+function cut() {
+	if (exports.frame in keyframes) {
+		let actions = keyframes[exports.frame].actions.filter(action => 
+			actors.actors.indexOf("id" in action ? action.id : 'target' in action ? action.target : null) == inspector.target
+		)
+		electron.clipboard.writeText(JSON.stringify(actions))
+		actions.forEach(action => inspector.removeAction(action))
+	}
+}
+
+function copy() {
+	if (exports.frame in keyframes) {
+		electron.clipboard.writeText(JSON.stringify(keyframes[exports.frame].actions.filter(action => 
+			actors.actors.indexOf("id" in action ? action.id : 'target' in action ? action.target : null) == inspector.target
+		)))
+	}
+}
+
+function paste() {
+	let actions
+	try {
+		actions = JSON.parse(electron.clipboard.readText())
+
+		for (let action in actions) {
+			console.log(JSON.stringify(actions[action]))
+	        if (!keyframes[exports.frame]) {
+	        	keyframes[exports.frame] = { actions: [] }
+				document.getElementById("frame " + exports.frame).classList.add("keyframe")
+	        }
+	        let actor = "id" in actions[action] ? actions[action].id : 'target' in actions[action] ? actions[action].target : null
+	        if ((actors.actors.indexOf(actor) === -1) != (inspector.target === -1)) continue
+			if (actor !== null) {
+				actions[action]["id" in actions[action] ? "id" : "target"] = actors.actors[inspector.target]
+				document.getElementById("actor " + inspector.target + " frame " + exports.frame).classList.add("keyframe")
+			}
+	        keyframes[exports.frame].actions.push(actions[action])
+		}
+	} catch (e) { console.error(e); return }
+
+	exports.simulateFromFrame()
+	inspector.update()
+}
+
+function deleteKey() {
+	if (exports.frame in keyframes) {
+		keyframes[exports.frame].actions.filter(action => 
+			actors.actors.indexOf("id" in action ? action.id : 'target' in action ? action.target : null) == inspector.target
+		).forEach(action => inspector.removeAction(action))
+	}
+}
+
+function recordChange() {
+	console.error(reverseHistory)
+	reverseHistory = []
+	let step = JSON.stringify(keyframes)
+	history.push(step)
+	updateTitle(step)
+}
+
+function undo() {
+	if (history.length === 0) return
+	reverseHistory.push(history.pop())
+	console.log(reverseHistory)
+	let step = history.length === 0 ? oldKeyframes : history[history.length - 1]
+	console.log(step)
+	exports.keyframes = keyframes = JSON.parse(step)
+	readScript()
+	updateTitle(step)
+}
+
+function redo() {
+	console.log(reverseHistory)
+	if (reverseHistory.length === 0) return
+	let step = reverseHistory.pop()
+	history.push(step)
+	exports.keyframes = keyframes = JSON.parse(step)
+	readScript()
+	updateTitle(step)
+}
+
+function readScript() {
+	project.scripts[controller.script] = exports.generateScript(true)
+	let frame = exports.frame
+	let target = inspector.target
+	controller.readScript()
+	exports.gotoFrame(Math.min(frame, exports.frames))
+	inspector.update(target)
+}
+
+function updateTitle(step) {
+	if (step === oldKeyframes) {
+		document.title = "Babble Movie Maker | " + project.getProjectName()
+	} else {
+		document.title = "Babble Movie Maker | " + project.getProjectName() + "(*)"
 	}
 }

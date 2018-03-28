@@ -10,6 +10,7 @@ const inspector = require('./inspector')
 
 const electron = require('electron')
 const modal = new (require('vanilla-modal').default)()
+const path = require('path')
 
 //  Vars
 let playing
@@ -62,6 +63,7 @@ exports.init = function() {
 	// Handle input events from popout
 	electron.ipcRenderer.on('save', () => {
 		project.saveProject()
+		timeline.clearHistory()
 	})
 	electron.ipcRenderer.on('close', () => {
 		project.closeProject()
@@ -79,6 +81,8 @@ exports.init = function() {
 	puppetscale.value = project.project.puppetScale
 	numslots.value = project.project.numCharacters
 	resolution.value = project.project.resolution
+
+	document.title = "Babble Movie Maker | " + project.getProjectName()
 }
 
 exports.closePanels = function() {
@@ -111,6 +115,8 @@ function keyDown(e) {
 	else handled = false
 
 	if (handled) e.preventDefault()
+
+	timeline.keyDown(e)
 }
 
 function beforeUnload() {
