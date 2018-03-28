@@ -7,6 +7,8 @@ const actors = require('./actors')
 const utility = require('./utility')
 
 const electron = require('electron')
+const fs = require('fs-extra')
+const path = require('path')
 
 // Vars
 let dropdowns = []
@@ -198,11 +200,8 @@ var commandFields = {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
 
-		let select = document.createElement("select")
-		select.frame = frame
-		select.action = action
-		select.key = key
-		select.addEventListener("change", editEmote)
+		let emotes = document.createElement("div")
+		emotes.style.marginRight = "-4px"
 
 		// populate 
 		let name = Object.keys(action).filter(key => 
@@ -211,21 +210,35 @@ var commandFields = {
 			stage.getPuppet(action.target) ? 
 			stage.getPuppet(action.target).container.puppet : null
 		if (puppet != null) { // jshint ignore: line
-			let emotes = Object.keys(puppet.emotes)
-			for (let i = 0; i < emotes.length; i++) {
-				let emote = puppet.emotes[emotes[i]]
-				if (!emote.enabled) continue
-				let option = document.createElement("option")
-				option.text = emote.name
-				select.appendChild(option)
-			}
+			let filepath = electron.remote.getGlobal('project').filepath
+			let babble = fs.readJsonSync(path.join(filepath, project.project.babble))
+			let location = babble.characters.filter(c => c.name == puppet.name)[0].location
+			for (let emote in puppet.emotes) {
+				if (!puppet.emotes[emote].enabled) continue
 
-			select.emotes = puppet.emotes
-			select.value = puppet.emotes[action[key]].name
+				let selector = document.createElement('div')
+				let thumbnail = path.join(location.substr(0, location.lastIndexOf('.')), emote + '.png')
+
+				selector.className = "char"
+				selector.innerHTML = '<div class="desc">' + puppet.emotes[emote].name + '</div>'
+				if (emote == action[key]) selector.classList.add("selected")
+				emotes.appendChild(selector)
+
+				let emoteThumbnail = document.createElement('div')
+			    selector.appendChild(emoteThumbnail)
+			    emoteThumbnail.name = name
+			    emoteThumbnail.style.height = emoteThumbnail.style.width = '120px'
+				emoteThumbnail.src = path.join(project.assetsPath, '..', 'thumbnails', thumbnail + '?random=' + new Date().getTime()).replace(/\\/g, '/')
+				emoteThumbnail.frame = frame
+				emoteThumbnail.action = action
+				emoteThumbnail.key = key
+				emoteThumbnail.emote = emote
+				emoteThumbnail.addEventListener("click", editEmote)
+			}
 		}
 
 		parent.appendChild(titleElement)
-		parent.appendChild(select)
+		parent.appendChild(emotes)
 	}
 }
 
@@ -594,7 +607,7 @@ function editCheck(e) {
 
 function editEmote(e) {
 	let frame = timeline.frame
-	e.target.action[e.target.key] = e.target.emotes.findIndex((emote) => emote.name === e.target.value)
+	e.target.action[e.target.key] = e.target.emote
 	timeline.simulateFromFrame(e.target.frame)
 	if (e.target.frame !== frame)
 		timeline.gotoFrame(frame, false)
