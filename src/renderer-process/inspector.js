@@ -20,7 +20,7 @@ let domInspector = document.getElementById("inspectorTarget")
 let domFramecount = document.getElementById("framecount")
 
 var commandFields = {
-	text: function(parent, field, frame, action, key) {
+	text: function(parent, field, frame, action, key, index) {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
 
@@ -35,7 +35,25 @@ var commandFields = {
 		textbox.value = action[key]
 		textbox.addEventListener("change", editText)
 		if (field.textarea) textbox.addEventListener("input", resizeTextbox)
-		else textbox.type = "text"
+		else {
+			textbox.type = "text"
+			textbox.setAttribute("list", action.command + " " + key + " " + index)
+		}
+
+		let textboxAutocomplete = document.createElement("datalist")
+		let options = []
+		textboxAutocomplete.id = action.command + " " + key + " " + index
+		let processAction = act => {
+				if (act.command == action.command && options.indexOf(act[key]) == -1) {
+					let option = document.createElement("option")
+					option.value = act[key]
+					options.push(act[key])
+					textboxAutocomplete.appendChild(option)
+				}
+			}
+		for (let script in project.scripts) {
+			project.scripts[script].forEach(processAction)
+		}
 
 		let sizedTextbox = document.createElement("div")
 		sizedTextbox.classList.add("textarea-size")
@@ -50,9 +68,10 @@ var commandFields = {
 			resizeTextbox({target: textbox})
 		} else {
 			parent.appendChild(textbox)
+			parent.appendChild(textboxAutocomplete)
 		}
 	},
-	puppet: function(parent, field, frame, action, key) {
+	puppet: function(parent, field, frame, action, key, index) {
 		let titleElement = document.createElement("p")
 		titleElement.innerText = field.title
 
@@ -66,9 +85,19 @@ var commandFields = {
 		textbox.addEventListener("change", editText)
 		textbox.addEventListener("mouseenter", enterPuppetField)
 		textbox.addEventListener("mouseleave", exitPuppetField)
+		textbox.setAttribute("list", action.command + " " + key + " " + index)
+
+		let textboxAutocomplete = document.createElement("datalist")
+		textboxAutocomplete.id = action.command + " " + key + " " + index
+		for (let actor in project.project.actors) {
+			let option = document.createElement("option")
+			option.value = project.project.actors[actor]
+			textboxAutocomplete.appendChild(option)
+		}
 		
 		parent.appendChild(titleElement)
 		parent.appendChild(textbox)
+		parent.appendChild(textboxAutocomplete)
 	},
 	number: function(parent, field, frame, action, key) {
 		let titleElement = document.createElement("p")
