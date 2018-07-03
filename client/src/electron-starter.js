@@ -35,13 +35,13 @@ function createWindow() {
         }
     })
 
-    mainWindow.openDevTools()
+    // mainWindow.openDevTools()
 
     mainWindowState.manage(mainWindow)
 
     // and load the index.html of the app.
     mainWindow.loadURL(process.env.ELECTRON_START_URL || url.format({
-        pathname: path.join(__dirname, '/../build/index.html'),
+        pathname: path.join(__dirname, 'index.html'),
         protocol: 'file:',
         slashes: true
     }))
