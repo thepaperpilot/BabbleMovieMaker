@@ -1,2 +1,3 @@
-src/node_modules
+client/node_modules
 out
+client/build

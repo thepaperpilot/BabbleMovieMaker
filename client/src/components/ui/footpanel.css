@@ -1,0 +1,64 @@
+.footbutton {
+    position: relative;
+    bottom: 0;
+    text-align: center;
+    width: calc(100% + 16px);
+    margin: -8px;
+    margin-top: 0;
+    border-top: solid 2px white;
+    border-radius: 0;
+    padding: 10px 10px;
+}
+
+.footbutton:hover {
+    background-color: unset;
+}
+
+.backdrop-close {
+    cursor: initial;
+    z-index: 2000;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.footpanel {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    height: 400px;
+    width: calc(100% - 2px);
+    border: solid 1px white;
+    background-color: #242a33;
+    transition: height .5s;
+    overflow: hidden;
+    z-index: 2500;
+}
+
+.footpanel.collapsed {
+    height: 0;
+}
+
+.footpanel .bar {
+    margin: 0;
+    padding: 0;
+}
+
+.inspector .footpanel .content-wrapper {
+    padding: 0;
+}
+
+/*
+.footpanel div:not(.scroll) {
+    padding: 4px;
+    background: #242a33;
+    border-bottom: solid 1px grey;
+}
+
+.footpanel div:not(.scroll):hover {
+    background: #2a323d;
+    cursor: pointer;
+}
+*/

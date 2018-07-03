@@ -1,0 +1,8 @@
+.framecount {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    font-size: 12pt;
+    padding: 2px 4px;
+    padding-bottom: 0px;
+}

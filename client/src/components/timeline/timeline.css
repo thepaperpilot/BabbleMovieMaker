@@ -1,0 +1,187 @@
+.timeline {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 0 20px 100px;
+}
+
+.flex-column > .timeline {
+    margin: -2px 0;
+}
+
+.script-name {
+    font-weight: bolder;
+    background: #2a323d;
+    border-bottom: 1px solid antiquewhite;
+    user-select: initial;
+}
+
+.actors-container {
+    position: absolute;
+    top: 30px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.actor, .script-name {
+    position: absolute;
+    left: 0;
+    width: 100px;
+    box-sizing: border-box;
+    padding-left: 8px;
+    line-height: 29px;
+    pointer-events: all;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    font-size: 12px;
+}
+
+.actor {
+    border-bottom: 1px solid dimgrey;    
+    cursor: pointer;
+}
+
+.horiz-scroll {
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 100%;
+    width: 100%;
+    padding-top: 30px;
+    display: inline-block;
+    box-sizing: border-box;
+    border-left: 1px solid antiquewhite;
+    position: relative;
+}
+
+.sticky-wrapper {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.sticky {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.sticky .frames {
+    pointer-events: all;
+}
+
+.horiz-scroll .positioning {
+    position: unset;
+    /* I couldn't get the scrollbar to appear correctly, so I just hid it */
+    display: none;
+}
+
+.frames {
+    height: 30px;
+}
+
+.frame {
+    width: 13px;
+    height: 100%;
+    border-bottom: solid 1px dimgrey;
+    border-right: solid 1px rgba(1,1,1,.5);
+    box-sizing: border-box;
+    display: inline-flex;
+    padding-bottom: 3px;
+}
+
+.sticky .frame {
+    border-bottom-color: antiquewhite;
+}
+
+.frame[data-time]::after {
+    content: '';
+    position: absolute;
+    border-left: 1px solid grey;
+    top: 0;
+    bottom: 0;
+    padding: 2px;
+    z-index: 10;
+    font-size: small;
+    pointer-events: none;
+}
+
+.sticky .frame[data-time]::after {
+    content: attr(data-time);
+}
+
+.frame:nth-child(5n) {
+    background: #2a323d;
+}
+
+.frame:hover, .frame.selected {
+    background: #333c4a;
+}
+
+.currentframe::before {
+    content: "";
+    z-index: 2;
+    background: #5261cf;
+    width: 2px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--time);
+    pointer-events: none;
+}
+
+.frame.lastframe {
+    border-right: solid 1px white;
+}
+
+.keyframe, .endframe {
+    width: 0;
+    height: 0;
+    border: 4px solid transparent;
+    border-bottom-color: white;
+    position: relative;
+    top: -12px;
+    left: 2px;
+    margin-top: 23px;
+    z-index: 3;
+}
+
+.keyframe:after, .endframe:after {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 4px;
+    width: 0;
+    height: 0;
+    border: 4px solid transparent;
+    border-top-color: white;
+}
+
+.endframe {
+    border-radius: 50%;
+    transform: scale(.5);
+    left: 1.2px;
+    top: -10px;
+}
+
+.error .keyframe {
+    border-bottom-color: yellow;
+}
+
+.error .keyframe:after {
+    border-top-color: yellow;
+}
+
+.droppable {
+    box-shadow: inset 0px 0px 0px 6px rgba(0,255,0,.05);
+}
+
+.droppable-hover {
+    box-shadow: inset 0px 0px 0px 6px rgba(0,255,0,.2);
+}

@@ -1,0 +1,79 @@
+.footpanel .react-select-container {
+    background-color: #333c4a;
+    font-size: 12px;
+    padding: 0;
+}
+
+.footpanel .react-select-container .react-select__control {
+    background: none;
+    border: none;
+    border-bottom: solid 1px #111924;
+    border-radius: 0;
+    min-height: unset;
+}
+
+.footpanel .react-select-container .react-select__control-is-focused {
+    box-shadow: none;
+}
+
+.footpanel .react-select-container .react-select__input {
+    color: white;
+}
+
+.footpanel .react-select-container .react-select__input input {
+    /*margin: 0;*/
+}
+
+/* This element didn't get a class, so I need to do this bs */
+.footpanel .react-select-container .react-select__value-container > :not(.react-select__placeholder) {
+    margin: 0;
+}
+
+.footpanel .react-select-container .react-select__dropdown-indicator, .react-select-container .react-select__indicator-separator {
+    display: none;
+}
+
+.footpanel .react-select-container .react-select__value-container {
+    padding-left: 24px;
+}
+
+.footpanel .react-select-container .react-select__value-container:before {
+    content: '🔍';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+}
+
+.footpanel .react-select-container .react-select__single-value {
+    color: white;
+}
+
+.footpanel .react-select-container .react-select__menu {
+    margin: 0;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.footpanel .react-select-container .react-select__menu-list {
+    padding: 0;
+    /* 400px menu, minus space for the search box 
+    max-height: 382px;*/
+}
+
+.footpanel .react-select-container .react-select__option {
+    text-align: left;
+    color: white;
+    border-bottom: solid 1px grey;
+    cursor: pointer;
+}
+
+.footpanel .react-select-container .react-select__option--is-focused {
+    background-color: #2a323d;
+}
+
+.footpanel .react-select-container .react-select__option:active {
+    background-color: #333c4a;
+}

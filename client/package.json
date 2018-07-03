@@ -1,0 +1,58 @@
+{
+  "name": "babble-mm",
+  "version": "1.0.0",
+  "description": "A client for creating cutscenes using babble.js",
+  "main": "src/electron-starter.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "electron": "ELECTRON_START_URL=http://localhost:3000 electron .",
+    "package": "electron-packager ./ BabbleBuds --all --prune --asar --out ../out --icon assets/icons/icon.icns"
+  },
+  "repository": "https://github.com/thepaperpilot/BabbleMovieMaker",
+  "keywords": [
+    "babble buds"
+  ],
+  "author": "thepaperpilot",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron-packager": "^11.2.0",
+    "eslint": "^4.19.1",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-react": "^7.8.2",
+    "react-scripts": "^1.1.4"
+  },
+  "dependencies": {
+    "ajv": "^5.3.0",
+    "babble.js": "~1.8.0",
+    "canvas-background": "~0.1.3",
+    "classnames": "^2.2.6",
+    "electron": "^1.8.4",
+    "electron-window-state": "~4.1.1",
+    "flexlayout-react": "^0.2.5",
+    "fs-extra": "^5.0.0",
+    "js-search": "^1.4.2",
+    "react": "^16.3.2",
+    "react-animate-height": "^2.0.1",
+    "react-autosize-textarea": "^3.0.3",
+    "react-autosuggest": "^9.3.4",
+    "react-contextmenu": "^2.9.2",
+    "react-custom-scroll": "^3.2.0",
+    "react-dnd": "^4.0.5",
+    "react-dnd-html5-backend": "^4.0.5",
+    "react-dom": "^16.3.2",
+    "react-edit-inline": "^1.0.8",
+    "react-redux": "^5.0.7",
+    "react-resize-detector": "^2.3.0",
+    "react-select": "^2.0.0-beta.6",
+    "react-select-fast-filter-options": "^0.2.3",
+    "react-virtualized-select": "^3.1.3",
+    "redux": "^4.0.0",
+    "redux-undo": "^1.0.0-beta9-9-7",
+    "semver": "^5.5.0",
+    "vanilla-modal": "1.6.2"
+  }
+}
