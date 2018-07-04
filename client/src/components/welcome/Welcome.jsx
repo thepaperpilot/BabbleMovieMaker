@@ -15,7 +15,7 @@ class Welcome extends Component {
                         'New Project': <NewProject />
                     }}/>
                 </div>
-                <div className="version">Babble Buds v{window.require('electron').remote.app.getVersion()}-beta</div>
+                <div className="version">Babble Movie Maker v{window.require('electron').remote.app.getVersion()}-beta</div>
             </div>
         )
     }

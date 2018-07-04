@@ -64,6 +64,7 @@ exports.newProject = function(babble) {
 }
 
 exports.openProject = function(project) {
+    console.log(project)
     BrowserWindow.getFocusedWindow().webContents.send('set project', project)
 }
 

@@ -16,27 +16,30 @@ class App extends Component {
 
         this.stage = React.createRef()
 
+        this.setProject = this.setProject.bind(this)
         this.closeProject = this.closeProject.bind(this)
         this.save = this.save.bind(this)
     }
 
     componentDidMount() {
-        electron.ipcRenderer.on('set project', (event, project) => {
-            if (!this.checkChanges()) return
-
-            this.props.dispatch({
-                type: 'LOAD_PROJECT',
-                project
-            })
-        })
-
+        electron.ipcRenderer.on('set project', this.setProject)
         electron.ipcRenderer.on('close', this.closeProject)
         electron.ipcRenderer.on('save', this.save)
     }
 
     componentWillUnmount() {
+        electron.ipcRenderer.removeListener('set project', this.setProject)
         electron.ipcRenderer.removeListener('close', this.closeProject)
         electron.ipcRenderer.removeListener('save', this.save)
+    }
+
+    setProject(event, project) {
+        if (!this.checkChanges()) return
+
+        this.props.dispatch({
+            type: 'LOAD_PROJECT',
+            project
+        })
     }
 
     closeProject() {
@@ -83,11 +86,9 @@ class App extends Component {
 
     save() {
         // TODO create a "thumbnail stage" instead of using a ref
-        electron.ipcRenderer.on('save', () => {
-            this.props.dispatch({
-                type: 'SAVE',
-                thumbnail: this.stage.current.stage.getThumbnail()
-            })
+        this.props.dispatch({
+            type: 'SAVE',
+            thumbnail: this.stage.current.stage.getThumbnail()
         })
     }
 

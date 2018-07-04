@@ -163,6 +163,7 @@ export const DEFAULTS = {
     project: null,
     assets: {},
     puppets: {},
+    puppetThumbnails: {},
     scripts: [],
     script: null,
     assetsPath: '',

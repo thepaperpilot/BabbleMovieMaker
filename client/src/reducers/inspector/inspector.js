@@ -19,16 +19,12 @@ function gotoInspect(state, action) {
     })
 }
 
-function removeCommand(state, action) {
-    if (state.targetType === 'command' && state.target === action.command)
-        return { target: null, targetType: null }
-    else return state
-}
-
-function removeCutscene(state, action) {
-    if (state.targetType === 'cutscene' && state.target === action.cutscene)
-        return { target: null, targetType: null }
-    else return state
+function removeTarget(targetType) {
+    return (state, action) => {
+        if (state.targetType === targetType && state.target === action[targetType])
+            return { target: null, targetType: null }
+        else return state
+    }
 }
 
 function renameTarget(targetType) {
@@ -42,8 +38,10 @@ function renameTarget(targetType) {
 export default util.createReducer(DEFAULTS, {
     'INSPECT': inspect,
     'GOTO_INSPECT': gotoInspect,
-    'REMOVE_COMMAND': removeCommand,
-    'REMOVE_CUTSCENE': removeCutscene,
+    'DELETE_ACTOR': removeTarget('actor'),
+    'REMOVE_COMMAND': removeTarget('command'),
+    'REMOVE_CUTSCENE': removeTarget('cutscene'),
     'RENAME_ACTOR': renameTarget('actor'),
-    'RENAME_COMMAND': renameTarget('command')
+    'RENAME_COMMAND': renameTarget('command'),
+    'RENAME_CUTSCENE': renameTarget('cutscene')
 })

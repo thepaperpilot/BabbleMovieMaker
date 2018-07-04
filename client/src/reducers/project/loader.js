@@ -56,10 +56,11 @@ function close(state) {
 }
 
 function loadProject(state, action) {
-    if (!fs.existsSync(action.project)) return close(state)
+    const filepath = action.project.replace(/\\/g, '/')
+    if (!fs.existsSync(filepath)) return close(state)
 
     // Copies project defaults
-    const settings = Object.assign({}, DEFAULTS.settings, fs.readJsonSync(action.project))
+    const settings = Object.assign({}, DEFAULTS.settings, fs.readJsonSync(filepath))
     if (Object.prototype.toString.call(settings.commands) === '[object Object]') {
         // Convert from object to array
         settings.commands = updateCommandsToList(settings.commands)
@@ -101,11 +102,11 @@ function loadProject(state, action) {
         if (remote.dialog.showMessageBox(options) === 0) return close(state)
     }
 
-    settingsManager.settings.openProject = action.project
+    settingsManager.settings.openProject = filepath
     settingsManager.save()
 
-    const {assets, puppets, puppetThumbnails} = loadBabble(settings, action.project)
-    let scripts = loadScripts(path.join(action.project, settings.scripts))
+    const {assets, puppets, puppetThumbnails} = loadBabble(settings, filepath)
+    let scripts = loadScripts(path.join(filepath, settings.scripts))
     if (!Array.isArray(scripts))
         scripts = updateCutscenesToList(scripts)
     if (scripts.length === 0)
@@ -114,14 +115,14 @@ function loadProject(state, action) {
     menu.updateMenu(true)
 
     return {
-        project: action.project,
+        project: filepath,
         settings,
         assets,
         puppets,
         puppetThumbnails,
         scripts: scripts,
         script: scripts[0].name,
-        assetsPath: `file:///${path.join(action.project, settings.assets)}`,
+        assetsPath: `file:///${path.join(filepath, settings.assets)}`,
         // TODO way to store a redux state and compare against it later?
         oldSettings: JSON.stringify(settings),
         oldScripts: JSON.stringify(scripts),

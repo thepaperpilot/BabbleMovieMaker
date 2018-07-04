@@ -114,9 +114,7 @@ class Cutscenes extends ReorderableList {
 
 function mapStateToProps(state) {
     return {
-        scripts: state.project.scripts.map(s => s.name),
-        target: state.inspector.target,
-        targetType: state.inspector.targetType
+        scripts: state.project.scripts.map(s => s.name)
     }
 }
 
